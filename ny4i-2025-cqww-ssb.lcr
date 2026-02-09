@@ -1,0 +1,232 @@
+﻿<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+<title>CQ WW Log Checking Report</title>
+<meta charset='UTF-8' />
+<meta name=viewport content='width=device-width, initial-scale=1'>
+<style>body {font-size: 16px;}</style>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js'></script>
+</head>
+
+<body>
+<pre>Contest:     2025 CQ WORLD WIDE SSB DX CONTEST
+Call:        NY4I
+Category:    Single Op All Band High Power Assisted
+Location:    WCF
+Processed:   2026-02-07 17:02:55
+
+Thank you for submitting a log in the 2025 CQ WW DX SSB Contest.
+
+Your log checking report is below. We believe it is helpful for participants
+to receive information about how their log was scored.
+
+Log checking details for CQ WW SSB 2025:
+   10,576 Logs total
+   83,011 Different calls claimed
+      213 Countries
+5,148,149 QSOs total
+4,687,290 (91.0%) QSO checked against another log
+4,550,228 (97.1%) QSO checked good when checked against another log
+   80,010 ( 1.9%) Busted calls
+   17,335 ( 0.4%) Busted exchange
+   35,422 ( 0.8%) Not in log
+
+Median score reduction for all logs: 8.3%
+Median error rate for all logs: 2.7%
+
+Explanation of the report sections:
+
+Summary - A summary of the log checking results and final score for your 
+entry.
+
+Results by Band - This is a band-by-band breakdown of the QSOs, points and 
+multipliers for your entry.
+
+Not In Log - These contacts were not found in the other station's log. QSO 
+removed with an added penalty of 2x QSO points.
+
+Incorrect Call - The call logged for these contacts was determined to 
+be incorrect. QSO removed with an added penalty of 2x QSO points.
+
+Incorrect Exchange Information - The information you copied does not match 
+what was in the other station's log. The QSO was removed.
+
+Out of Band - Contacts that were made on a frequency that you are not 
+authorized to use. These contacts are removed without penalty.
+
+Band Change Violations (Multi-One or Multi-Two only) - These contacts 
+violated the band change rules for the category. The QSO was removed
+without penalty.
+
+Unique Calls Receiving Credit - These calls were not found in any other log. 
+They have not been removed, but our experience shows they are often the 
+result of copying errors.
+
+Lost Multipliers - This section lists the multipliers that were lost in 
+your log due to callsign, exchange, or other copying errors. 
+-C indicates lost country and -Z indicates lost zone.
+
+Multipliers by band - This section lists the zones and countries that were 
+counted as multipliers in your log.
+
+Stations Copying Call Incorrectly - This is a list of all contacts we could
+find where the station you worked copied your call incorrectly. You do 
+not lose credit for these contacts. They are provided for your information.
+If you have many similar errors, you should concentrate on ways to send your 
+call differently that may be easier for others to correctly copy.
+
+Stations Receiving Not In Log - List of contacts in other logs that were not
+confirmed in your log. They are provided for your information.
+
+Stations Copying Your Exchange Incorrectly - List of contacts where the 
+station you worked copied your exchange incorrectly. You do not lose credit 
+for these contacts. They are provided for your information. 
+
+All logs are checked using custom software. Please submit any questions
+at https://cqww.com/contact/ 
+
+The decisions of the CQ WW Contest Committee are final. 
+
+
+73,
+
+CQ WW DX Contest Committee
+
+========================================================================
+
+                         *** PLEASE HELP ***
+
+The IT infrastructure behind the log submission, storage, checking software, 
+and this report are maintained and operated by volunteers. 
+
+The World Wide Radio Operators Foundation, Inc. ("WWROF") has committed to 
+reimburse these infrastructure expenses to support this contest. WWROF is
+a non-profit donor-supported organization. Please consider making a 
+contribution to the WWROF at http://www.wwrof.org/content/donate
+
+========================================================================
+
+************************** Summary ***************************
+
+      99 Raw    QSO before checking (does not include duplicates or missing exchanges)
+      95 Final  QSO after  checking reductions
+
+     269 Raw    QSO points
+     247 Final  QSO points
+
+      37 Raw    zones
+      35 Final  zones
+
+      74 Raw    countries
+      70 Final  countries
+
+     111 Raw    mults
+     105 Final  mults
+
+   29859 Raw    score
+   25935 Final  score
+
+    4.0% error rate based on raw and final qso counts
+   13.1% score reduction
+      2  (2.0%) not in log
+      1  (1.0%) incorrect calls
+      2  (2.0%) incorrect exchanges
+      0  (0.0%) missing exchanges
+      0  (0.0%) duplicates removed
+      0  (0.0%) calls unique to this log only (not removed)
+       1 out of band qsos removed
+
+********************** Results By Band ***********************
+
+             Band   QSO  QPts  Zone Cty Mult
+
+   Raw       160M     0     0     0   0    0
+   Final     160M     0     0     0   0    0
+
+   Raw        80M     0     0     0   0    0
+   Final      80M     0     0     0   0    0
+
+   Raw        40M    11    33     3   7   10
+   Final      40M    11    33     3   7   10
+
+   Raw        20M    36    96    13  23   36
+   Final      20M    34    85    12  21   33
+
+   Raw        15M     9    25     7   9   16
+   Final      15M     8    23     7   8   15
+
+   Raw        10M    43   115    14  35   49
+   Final      10M    42   106    13  34   47
+
+   Raw        All    99   269    37  74  111     29859
+   Final      All    95   247    35  70  105     25935
+
+*********************** Incorrect Call ***********************
+
+14205 PH 2025-10-26 2320 NY4I     05   VP2/W3MLJ   08  correct VP2V/W3MLJ
+
+************************* Not In Log *************************
+
+14224 PH 2025-10-26 2236 NY4I     05   TF3SG    40 
+28394 PH 2025-10-26 2247 NY4I     05   LT6T     13 
+
+*************** Incorrect Exchange Information ***************
+
+14339 PH 2025-10-25 0139 NY4I     05   TO2M     05  correct     8
+21381 PH 2025-10-26 1709 NY4I     05   TO4K     14  correct     8
+
+************************ Out Of Band *************************
+
+21162 PH 2025-10-25 1902 NY4I     05   5K0UA    07 
+
+********************** Lost Multipliers **********************
+
+14339 PH 2025-10-25 0139 NY4I     05   TO2M     05  correct 8       C
+21381 PH 2025-10-26 1709 NY4I     05   TO4K     14  correct 08      C
+14224 PH 2025-10-26 2236 NY4I     05   TF3SG    40  Not in log C,Z
+28394 PH 2025-10-26 2247 NY4I     05   LT6T     13  Not in log C,Z
+
+*******************  Multipliers by Band  ********************
+
+40M multiplier total 10
+
+9A    DL    EA    I     OM    SP    UA    
+
+ 14 15 16
+
+20M multiplier total 33
+
+8P    CT    CT3   CU    EA    EA8   F     GM    HZ    I     
+JY    KP4   LU    PJ4   PJ5   PY    SM    TI    V2    VE    
+VP2M  
+
+  4  5  7  8  9 11 13 14 15 20 21 33
+
+15M multiplier total 15
+
+CE    CT3   EA    I     PA    PJ4   UA    VP2M  
+
+  8  9 12 14 15 16 33
+
+10M multiplier total 47
+
+9Y    CE    CT    D4    DL    EA    EA8   EI    F     FY    
+G     GI    GM    HK0/a I     J6    JA    K     KL    KP2   
+LZ    OK    ON    OY    P4    PA    PJ4   PZ    TI    V2    
+V4    VP2M  VP2V  XE    
+
+  1  5  6  7  8  9 12 14 15 20 25 33 35
+
+
+********** Stations Receiving Not In Log From NY4I ***********
+
+14224 PH 2025-10-26 2236 4M5A     09   NY4I     05 
+
+********* Stations Copying NY4I Exchange Incorrectly *********
+
+28780 PH 2025-10-26 1742 OT8M     14   NY4I     04  correct 5
+</pre><pre style='font-size: 12px'>
+
+Copyright &copy 2008-2026  <a href='https://wwrof.org' target='blank'>World Wide Radio Operators Foundation</a>. All Rights Reserved.
+</pre></body>
+</html>
