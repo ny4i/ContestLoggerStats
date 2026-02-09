@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """
-LCR Error Analyzer - Compares CQ WW Log Checking Reports against ADIF logs
+LCR Error Analyzer - Compares contest Log Checking Reports against ADIF logs
 to identify error patterns by operator, band, time of day, and error type.
+
+Supports LCR files in HTML (.lcr/.html) and PDF (.pdf) formats.
+Requires 'pypdf' package for PDF support: pip install pypdf
 
 Usage: python3 analyze_lcr.py <lcr_file> <adif_file>
 """
 
 import re
+import os
 import sys
 import argparse
+import subprocess
 from collections import defaultdict
 
 
@@ -53,12 +58,45 @@ def parse_adif(filepath):
     return qsos
 
 
-def parse_lcr(filepath):
-    """Parse LCR HTML file. Returns list of error dicts."""
+def extract_text_from_pdf(filepath):
+    """Extract plain text from a PDF file."""
+    try:
+        from pypdf import PdfReader
+        reader = PdfReader(filepath)
+        return '\n'.join(page.extract_text() or '' for page in reader.pages)
+    except ImportError:
+        pass
+
+    # Fallback: try pdftotext CLI (poppler)
+    try:
+        result = subprocess.run(
+            ['pdftotext', '-layout', filepath, '-'],
+            capture_output=True, text=True, check=True,
+        )
+        return result.stdout
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+
+    print('ERROR: Cannot read PDF. Install pypdf (pip install pypdf) '
+          'or pdftotext (brew install poppler).', file=sys.stderr)
+    sys.exit(1)
+
+
+def read_lcr_text(filepath):
+    """Read an LCR file (HTML or PDF) and return plain text."""
+    ext = os.path.splitext(filepath)[1].lower()
+    if ext == '.pdf':
+        return extract_text_from_pdf(filepath)
+
     with open(filepath, 'r', encoding='utf-8-sig') as f:
         content = f.read()
+    # Strip HTML tags if present
+    return re.sub(r'<[^>]+>', '', content)
 
-    text = re.sub(r'<[^>]+>', '', content)
+
+def parse_lcr(filepath):
+    """Parse LCR file (HTML or PDF). Returns list of error dicts."""
+    text = read_lcr_text(filepath)
 
     section_map = {
         r'\*+\s*Incorrect Call\s*\*+': 'incorrect_call',
@@ -191,7 +229,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Analyze CQ WW LCR errors against ADIF log by operator, band, and time.'
     )
-    parser.add_argument('lcr', help='Path to LCR file (.lcr)')
+    parser.add_argument('lcr', help='Path to LCR file (.lcr, .html, or .pdf)')
     parser.add_argument('adif', help='Path to ADIF file (.adi)')
     args = parser.parse_args()
 
