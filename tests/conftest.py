@@ -8,8 +8,7 @@ from stats.contest_data import QSO
 from stats.cty_dat import CtyDat
 
 
-CTY_DAT_PATH = os.path.expanduser("~/Library/Application Support/TR4QT/cty.dat")
-SAMPLE_ADIF = "/Volumes/shared/ContestFilesForStats/w4ta.ADI"
+CTY_DAT_PATH = os.path.join(os.path.dirname(__file__), "data", "cty.dat")
 
 
 @pytest.fixture(scope="session")

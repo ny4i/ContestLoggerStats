@@ -3,7 +3,8 @@
 import os
 import pytest
 from stats.adif_parser import parse_adif, parse_adif_raw
-from tests.conftest import SAMPLE_ADIF
+
+SAMPLE_ADIF = os.environ.get("SAMPLE_ADIF", "")
 
 
 @pytest.mark.skipif(not os.path.isfile(SAMPLE_ADIF), reason="Sample ADIF not available")
