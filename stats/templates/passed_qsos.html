@@ -13,7 +13,7 @@
     {% for p in passed_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ p.call }}">{{ p.call }}</a></td>
+        <td><a rel="nofollow" target="_blank" href="{{ callsign_url(p.call) }}">{{ p.call }}</a></td>
         <td>{{ p.count }}</td>
         <td>{{ p.bands }}</td>
         <td>{{ p.operators }}</td>

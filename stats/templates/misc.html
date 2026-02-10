@@ -11,7 +11,7 @@
     {% for row in rows %}
     <tr class="{{ loop_class(loop.index) }}">
         {% for cell in row %}
-        <td>{{ cell }}</td>
+        <td>{% if callsign_col is defined and callsign_col == loop.index0 %}<a rel="nofollow" target="_blank" href="{{ callsign_url(cell) }}">{{ cell }}</a>{% else %}{{ cell }}{% endif %}</td>
         {% endfor %}
     </tr>
     {% endfor %}

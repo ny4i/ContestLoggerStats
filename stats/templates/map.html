@@ -45,6 +45,7 @@
         showCoverageOnHover: false
     });
 
+    var callsignBaseUrl = '{{ callsign_base_url }}';
     var qsos = {{ qso_data_json }};
     for (var i = 0; i < qsos.length; i++) {
         var q = qsos[i];
@@ -59,7 +60,7 @@
             fillOpacity: 0.7
         });
         marker.bindPopup(
-            '<b>' + q.call + '</b><br>' +
+            '<b><a rel="nofollow" target="_blank" href="' + callsignBaseUrl + q.call + '">' + q.call + '</a></b><br>' +
             q.band + ' ' + q.mode + '<br>' +
             q.time + '<br>' +
             q.country + '<br>' +

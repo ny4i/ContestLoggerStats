@@ -583,7 +583,7 @@ def prepare_minute(log: ContestLog) -> dict:
         rows.append({
             'time': t,
             'count': len(qs),
-            'calls': ', '.join(q.call for q in qs[:5]),
+            'calls': [q.call for q in qs[:5]],
             'band': ', '.join(sorted({q.band for q in qs})),
             'mode': ', '.join(sorted({q.mode_group for q in qs})),
         })
@@ -606,7 +606,7 @@ def prepare_one_minute_rates(log: ContestLog) -> dict:
         rows.append({
             'time': t,
             'count': len(qs),
-            'calls': ', '.join(q.call for q in qs[:5]),
+            'calls': [q.call for q in qs[:5]],
             'band': ', '.join(sorted({q.band for q in qs})),
             'mode': ', '.join(sorted({q.mode_group for q in qs})),
         })
@@ -716,6 +716,7 @@ def prepare_not_in_master(log: ContestLog,
     return {
         'headers': ['Callsign', 'Band', 'Mode', 'Time'],
         'rows': not_found,
+        'callsign_col': 0,
         'description': (f'{unique_not_found} callsigns not found in {source} '
                         f'({pct:.1f}% of {total_calls}).'),
     }
@@ -745,6 +746,7 @@ def prepare_lotw_check(log: ContestLog,
     return {
         'headers': ['Callsign', 'In LOTW'],
         'rows': rows,
+        'callsign_col': 0,
         'description': (f'{in_lotw_count} of {total} unique callsigns '
                         f'({pct:.1f}%) are LOTW users.'),
     }
@@ -768,6 +770,7 @@ def prepare_possible_errors(log: ContestLog) -> dict:
     return {
         'headers': ['Callsign', 'Band', 'Freq', 'Time', 'Issue'],
         'rows': errors,
+        'callsign_col': 0,
         'description': f'{len(errors)} possible errors found.',
     }
 

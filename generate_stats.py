@@ -114,6 +114,9 @@ def main():
                         help='Path to LOTW user activity CSV file')
     parser.add_argument('--no-download', action='store_true',
                         help='Skip auto-download of MASTER.SCP and LOTW files')
+    parser.add_argument('--callsign-lookup', default='qrz',
+                        choices=['qrz', 'hamqth'],
+                        help='Callsign lookup service for hyperlinks (default: qrz)')
 
     args = parser.parse_args()
 
@@ -203,7 +206,8 @@ def main():
 
     # Render HTML
     renderer = Renderer(log, args.output_dir,
-                        scp_calls=scp_calls, lotw_users=lotw_users)
+                        scp_calls=scp_calls, lotw_users=lotw_users,
+                        callsign_lookup=args.callsign_lookup)
     renderer.render_all()
 
     print(f"\nOutput written to {os.path.abspath(args.output_dir)}/")

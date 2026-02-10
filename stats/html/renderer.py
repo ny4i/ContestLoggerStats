@@ -88,7 +88,8 @@ class Renderer:
 
     def __init__(self, log: ContestLog, output_dir: str,
                  scp_calls: set[str] | None = None,
-                 lotw_users: set[str] | None = None):
+                 lotw_users: set[str] | None = None,
+                 callsign_lookup: str = 'qrz'):
         self.log = log
         self.output_dir = output_dir
         self.scp_calls = scp_calls
@@ -103,6 +104,11 @@ class Renderer:
             autoescape=False,
         )
         self.env.globals['loop_class'] = lambda i: 'td0' if i % 2 == 0 else 'td1'
+
+        base_url = ('https://www.hamqth.com/' if callsign_lookup == 'hamqth'
+                     else 'https://www.qrz.com/db/')
+        self.env.globals['callsign_url'] = lambda call: base_url + call
+        self.env.globals['callsign_base_url'] = base_url
 
     def _common_context(self, page_title: str, filename: str) -> dict:
         """Build the common template context shared by all pages."""

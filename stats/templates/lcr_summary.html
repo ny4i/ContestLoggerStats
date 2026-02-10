@@ -58,7 +58,7 @@
         <td>{{ loop.index }}</td>
         <td>{{ q.date }}</td>
         <td>{{ q.time }}</td>
-        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ q.call }}">{{ q.call }}</a></td>
+        <td><a rel="nofollow" target="_blank" href="{{ callsign_url(q.call) }}">{{ q.call }}</a></td>
         <td>{{ q.band }}</td>
         <td>{{ q.mode }}</td>
         <td>{{ q.error }}</td>

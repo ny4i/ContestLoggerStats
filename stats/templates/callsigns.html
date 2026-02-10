@@ -13,7 +13,7 @@
     {% for c in callsign_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ c.call }}">{{ c.call }}</a></td>
+        <td><a rel="nofollow" target="_blank" href="{{ callsign_url(c.call) }}">{{ c.call }}</a></td>
         <td>{{ c.count }}</td>
         <td>{{ c.country }}</td>
         <td>{{ c.bands }}</td>
