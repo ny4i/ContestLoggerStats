@@ -5,15 +5,17 @@ Generates SH5-style HTML statistics pages from ADIF contest logs.
 """
 
 import argparse
+import re
 import sys
 import os
 
-from stats.adif_parser import parse_adif
+from stats.adif_parser import parse_adif, parse_adif_raw
 from stats.cty_dat import CtyDat, extract_wpx_prefix
 from stats.geo import grid_to_latlon, haversine_km, bearing_deg
 from stats.dupe_detector import find_dupes
 from stats.privacy import anonymize, apply_privacy, write_operator_key
 from stats.contest_data import ContestLog
+from stats.contest_rules import load_contest_definitions, lookup_contest, validate_exchanges, estimate_score
 from stats.html.renderer import Renderer
 from stats.master_scp import find_master_scp, download_master_scp, load_master_scp, CACHE_DIR
 from stats.lotw_users import find_lotw_users, download_lotw_users, load_lotw_users
@@ -91,8 +93,9 @@ def main():
         description='Generate contest log statistics HTML pages from ADIF files.'
     )
     parser.add_argument('adif', help='Path to ADIF file (.adi)')
-    parser.add_argument('--output-dir', '-o', default='./stats_output',
-                        help='Output directory (default: ./stats_output)')
+    parser.add_argument('--output-dir', '-o', default=None,
+                        help='Output directory (default: YYYY-Mon-ContestName-Callsign)')
+
     parser.add_argument('--callsign', '-c', default='',
                         help='Station callsign (overrides ADIF header)')
     parser.add_argument('--locator', '-l', default='',
@@ -103,9 +106,9 @@ def main():
                         help='Path to cty.dat file')
     parser.add_argument('--hide-operators', action='store_true',
                         help='Anonymize operator names')
-    parser.add_argument('--dupe-rule', default='per_band_mode',
-                        choices=['per_band_mode', 'per_band'],
-                        help='Dupe detection rule (default: per_band_mode)')
+    parser.add_argument('--dupe-rule', default=None,
+                        choices=['per_band_mode', 'per_band', 'all_band_mode'],
+                        help='Dupe detection rule (default: auto-detect from contest, or per_band_mode)')
     parser.add_argument('--lcr', default=None,
                         help='Path to LCR file for error overlay')
     parser.add_argument('--master-scp', default=None,
@@ -117,6 +120,10 @@ def main():
     parser.add_argument('--callsign-lookup', default='qrz',
                         choices=['qrz', 'hamqth'],
                         help='Callsign lookup service for hyperlinks (default: qrz)')
+    parser.add_argument('--photos', default=None,
+                        help='Directory containing operator photos (CALLSIGN.jpg or .png)')
+    parser.add_argument('--remote', default=None,
+                        help='Remote destination (user@host:/path) for scp command hint')
 
     args = parser.parse_args()
 
@@ -135,20 +142,71 @@ def main():
     else:
         print("Warning: cty.dat not found. Country data will be empty.", file=sys.stderr)
 
+    # Load contest definitions and auto-detect rules
+    definitions = load_contest_definitions()
+    header_peek, raw_qsos = parse_adif_raw(args.adif)
+    # CONTEST_ID may be in first QSO record rather than header
+    if 'CONTEST_ID' not in header_peek and raw_qsos:
+        header_peek['CONTEST_ID'] = raw_qsos[0].get('CONTEST_ID', '')
+    contest_id = header_peek.get('CONTEST_ID', '')
+    contest_def = lookup_contest(contest_id, definitions)
+
+    # Resolve dupe rule: CLI overrides auto-detect
+    if args.dupe_rule is not None:
+        dupe_rule = args.dupe_rule
+    elif contest_def:
+        dupe_rule = contest_def.dupe_rule
+    else:
+        dupe_rule = 'per_band_mode'
+
     # Build contest log
     log = build_contest_log(
         args.adif, cty,
         args.callsign, args.locator, args.contest,
-        args.dupe_rule,
+        dupe_rule,
     )
+
+    # Store contest_id on log
+    log.contest_id = contest_id
+
+    # Populate station country/continent from cty.dat
+    station_data = cty.lookup(log.station_call)
+    if station_data.is_valid():
+        log.station_country = station_data.name
+        log.station_continent = station_data.continent
+
+    # Build output directory name if not specified
+    if args.output_dir is None:
+        year = log.start_time.strftime("%Y") if log.start_time else "unknown"
+        mon = log.start_time.strftime("%b").upper() if log.start_time else "unknown"
+        contest = re.sub(r'[^\w\-]', '-', log.contest_name).strip('-')
+        call = re.sub(r'[^\w\-]', '-', log.station_call).strip('-')
+        args.output_dir = f"./{year}-{mon}-{contest}-{call}"
 
     print(f"Parsed {len(log.qsos)} QSOs from {args.adif}")
     print(f"  Station: {log.station_call} @ {log.locator}")
+    if log.station_country:
+        print(f"  Station country: {log.station_country} ({log.station_continent})")
     print(f"  Contest: {log.contest_name}")
+    if contest_def:
+        print(f"  Contest rules: {contest_def.name} (dupe rule: {dupe_rule})")
     print(f"  Operators: {len(log.operators)}")
     print(f"  Bands: {', '.join(log.active_bands)}")
     print(f"  Dupes: {sum(1 for q in log.qsos if q.is_dupe)}")
     print(f"  Countries: {len({q.country for q in log.qsos if q.country})}")
+
+    # Exchange validation
+    if contest_def:
+        validate_exchanges(log.qsos, contest_def, log.station_country)
+        bad = sum(1 for q in log.qsos if q.exchange_error)
+        if bad:
+            print(f"  Exchange errors: {bad}")
+
+    # Compute estimated score
+    score_result = None
+    if contest_def:
+        score_result = estimate_score(log, contest_def)
+        print(f"  Estimated score: {score_result.total_score:,}")
 
     # Apply LCR overlay if provided
     if args.lcr:
@@ -207,11 +265,18 @@ def main():
     # Render HTML
     renderer = Renderer(log, args.output_dir,
                         scp_calls=scp_calls, lotw_users=lotw_users,
-                        callsign_lookup=args.callsign_lookup)
+                        callsign_lookup=args.callsign_lookup,
+                        photos_dir=args.photos,
+                        score_result=score_result)
     renderer.render_all()
 
     print(f"\nOutput written to {os.path.abspath(args.output_dir)}/")
     print(f"Open {os.path.join(os.path.abspath(args.output_dir), 'index.htm')} in a browser.")
+
+    if args.remote:
+        remote = args.remote.rstrip('/')
+        print(f"\nTo deploy remotely:")
+        print(f"  scp -r {os.path.abspath(args.output_dir)} {remote}/")
 
 
 if __name__ == '__main__':

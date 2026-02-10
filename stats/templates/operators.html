@@ -4,6 +4,7 @@
 <table class="mtc">
     <tr class="thc">
         <th>#</th>
+        {% if has_photos %}<th></th>{% endif %}
         <th>Operator</th>
         <th>QSOs</th>
         <th>%</th>
@@ -18,7 +19,10 @@
     {% for op in operator_stats %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ op.call }}">{{ op.call }}</a></td>
+        {% if has_photos %}
+        <td>{% if op.photo %}<img src="{{ op.photo }}" alt="{{ op.call }}" style="height:40px;border-radius:4px">{% endif %}</td>
+        {% endif %}
+        <td><a rel="nofollow" href="{{ callsign_url(op.call) }}">{{ op.call }}</a></td>
         <td>{{ op.total }}</td>
         <td><i>{{ "%.1f"|format(op.pct) }}</i></td>
         <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(op.pct) }}px"></div></td>

@@ -31,6 +31,7 @@ class QSO:
     grid: str = ""
     # Annotations:
     is_dupe: bool = False
+    exchange_error: str = ""
     lcr_error: Optional[str] = None
     lcr_detail: str = ""
 
@@ -45,6 +46,9 @@ class ContestLog:
     start_time: datetime
     end_time: datetime
     category: str = ""
+    contest_id: str = ""
+    station_country: str = ""
+    station_continent: str = ""
     station_lat: float = 0.0
     station_lon: float = 0.0
 

@@ -89,11 +89,15 @@ class Renderer:
     def __init__(self, log: ContestLog, output_dir: str,
                  scp_calls: set[str] | None = None,
                  lotw_users: set[str] | None = None,
-                 callsign_lookup: str = 'qrz'):
+                 callsign_lookup: str = 'qrz',
+                 photos_dir: str | None = None,
+                 score_result=None):
         self.log = log
         self.output_dir = output_dir
         self.scp_calls = scp_calls
         self.lotw_users = lotw_users
+        self.photos_dir = photos_dir
+        self.score_result = score_result
         has_lcr = any(q.lcr_error for q in log.qsos)
         self.nav_pages = _build_nav(log.active_bands, has_lcr,
                                     has_lotw=lotw_users is not None)
@@ -155,20 +159,47 @@ class Renderer:
             if os.path.isfile(src):
                 shutil.copy2(src, os.path.join(self.output_dir, fname))
 
+    def _copy_photos(self) -> dict[str, str]:
+        """Find operator photos, copy to output, return call→filename map."""
+        if not self.photos_dir or not os.path.isdir(self.photos_dir):
+            return {}
+
+        photo_map = {}
+        # Index all jpg/png files in the photos directory by uppercase stem
+        available = {}
+        for fname in os.listdir(self.photos_dir):
+            stem, ext = os.path.splitext(fname)
+            if ext.lower() in ('.jpg', '.jpeg', '.png'):
+                available[stem.upper()] = fname
+
+        photos_out = os.path.join(self.output_dir, "photos")
+        for op in self.log.operators:
+            match = available.get(op.upper())
+            if match:
+                os.makedirs(photos_out, exist_ok=True)
+                shutil.copy2(
+                    os.path.join(self.photos_dir, match),
+                    os.path.join(photos_out, match),
+                )
+                photo_map[op] = f"photos/{match}"
+
+        return photo_map
+
     def render_all(self):
         """Render all statistics pages."""
         os.makedirs(self.output_dir, exist_ok=True)
         self._copy_assets()
+        photo_map = self._copy_photos()
 
         # ── Phase 1: Core pages ──
         self._render_page("index.html", "index.htm", "Main",
-                          pages.prepare_index(self.log))
+                          pages.prepare_index(self.log, self.score_result))
         self._render_page("summary.html", "summary.htm", "Summary",
-                          pages.prepare_summary(self.log))
+                          pages.prepare_summary(self.log, self.score_result))
         self._render_page("log.html", "log.htm", "Log",
                           pages.prepare_log(self.log))
         self._render_page("operators.html", "operators.htm", "Operators",
-                          pages.prepare_operators(self.log))
+                          pages.prepare_operators(self.log, photo_map))
         self._render_page("dupes.html", "dupes.htm", "Dupes",
                           pages.prepare_dupes(self.log))
 

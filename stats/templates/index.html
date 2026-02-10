@@ -22,7 +22,8 @@
     <tr class="{{ loop_class(17) }}"><td>Countries</td><td><a href="countries.htm">{{ country_count }}</a></td></tr>
     <tr class="{{ loop_class(18) }}"><td>Prefixes</td><td><a href="prefixes.htm">{{ prefix_count }}</a></td></tr>
     <tr class="{{ loop_class(19) }}"><td>Moves</td><td>{{ "{:,}".format(move_count) }}</td></tr>
-    {% if software %}<tr class="{{ loop_class(20) }}"><td>Software</td><td>{{ software }}</td></tr>{% endif %}
+    {% if score %}<tr class="{{ loop_class(20) }}"><td>Estimated score</td><td><a href="summary.htm"><b>{{ "{:,}".format(score.total_score) }}</b></a></td></tr>{% endif %}
+    {% if software %}<tr class="{{ loop_class(21) }}"><td>Software</td><td>{{ software }}</td></tr>{% endif %}
 </table>
 </div>
 {% endblock %}

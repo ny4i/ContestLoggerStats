@@ -32,3 +32,15 @@ class TestFindDupes:
             q.is_dupe = False
         find_dupes(sample_qsos, rule="per_band_mode")
         assert not sample_qsos[2].is_dupe  # W1AW 40m CW
+
+    def test_all_band_mode(self, sample_qsos):
+        # all_band_mode: any repeat of same callsign is dupe
+        for q in sample_qsos:
+            q.is_dupe = False
+        count = find_dupes(sample_qsos, rule="all_band_mode")
+        # W1AW appears at indices 0, 2, 3 — indices 2 and 3 are dupes
+        assert count == 2
+        assert not sample_qsos[0].is_dupe  # first W1AW
+        assert not sample_qsos[1].is_dupe  # VE3RL (unique)
+        assert sample_qsos[2].is_dupe      # W1AW 40m (dupe)
+        assert sample_qsos[3].is_dupe      # W1AW 20m (dupe)

@@ -10,7 +10,7 @@ from ..contest_data import ContestLog, QSO
 from ..cty_dat import extract_wpx_prefix
 
 
-def prepare_index(log: ContestLog) -> dict:
+def prepare_index(log: ContestLog, score_result=None) -> dict:
     """Main dashboard page data."""
     total = len(log.qsos)
     dupes = sum(1 for q in log.qsos if q.is_dupe)
@@ -46,7 +46,7 @@ def prepare_index(log: ContestLog) -> dict:
 
     break_pct = (break_mins / total_mins * 100) if total_mins > 0 else 0
 
-    return {
+    result = {
         'station_country': log.qsos[0].country if log.qsos and log.qsos[0].country else '',
         'locator': log.locator,
         'category': log.category,
@@ -68,8 +68,19 @@ def prepare_index(log: ContestLog) -> dict:
         'software': '',
     }
 
+    if score_result:
+        result['score'] = {
+            'qso_points': score_result.qso_points,
+            'multipliers': score_result.multipliers,
+            'total_score': score_result.total_score,
+            'mult_detail': score_result.mult_detail,
+            'notes': score_result.scoring_notes,
+        }
 
-def prepare_summary(log: ContestLog) -> dict:
+    return result
+
+
+def prepare_summary(log: ContestLog, score_result=None) -> dict:
     """Band × mode summary matrix."""
     band_order = ["160m", "80m", "40m", "20m", "15m", "10m", "6m", "2m"]
     mode_groups = log.active_mode_groups
@@ -97,16 +108,29 @@ def prepare_summary(log: ContestLog) -> dict:
             'countries': band_countries,
         })
 
-    return {
+    result = {
         'band_rows': band_rows,
         'mode_groups': mode_groups,
         'totals_by_mode': dict(totals_by_mode),
         'total_qsos': total,
     }
 
+    if score_result:
+        result['score'] = {
+            'qso_points': score_result.qso_points,
+            'multipliers': score_result.multipliers,
+            'total_score': score_result.total_score,
+            'mult_detail': score_result.mult_detail,
+            'notes': score_result.scoring_notes,
+        }
 
-def prepare_operators(log: ContestLog) -> dict:
+    return result
+
+
+def prepare_operators(log: ContestLog,
+                      photo_map: dict[str, str] | None = None) -> dict:
     """Operator statistics."""
+    photo_map = photo_map or {}
     op_qsos = defaultdict(list)
     for q in log.qsos:
         op_qsos[q.operator].append(q)
@@ -132,6 +156,7 @@ def prepare_operators(log: ContestLog) -> dict:
             'countries': countries,
             'dupes': dupes,
             'errors': errors,
+            'photo': photo_map.get(op, ''),
         })
 
     stats.sort(key=lambda x: x['total'], reverse=True)
@@ -139,6 +164,7 @@ def prepare_operators(log: ContestLog) -> dict:
     return {
         'operator_stats': stats,
         'has_lcr': has_lcr,
+        'has_photos': bool(photo_map),
     }
 
 
@@ -767,8 +793,15 @@ def prepare_possible_errors(log: ContestLog) -> dict:
                 errors.append([q.call, q.band, f"{q.freq_mhz:.3f}",
                                q.datetime_utc.strftime('%H:%M'), 'Out of band'])
 
+    # Exchange validation errors
+    for q in log.qsos:
+        if q.exchange_error:
+            errors.append([q.call, q.band, q.srx,
+                           q.datetime_utc.strftime('%H:%M'),
+                           f'Exchange: {q.exchange_error}'])
+
     return {
-        'headers': ['Callsign', 'Band', 'Freq', 'Time', 'Issue'],
+        'headers': ['Callsign', 'Band', 'Freq/Exchange', 'Time', 'Issue'],
         'rows': errors,
         'callsign_col': 0,
         'description': f'{len(errors)} possible errors found.',

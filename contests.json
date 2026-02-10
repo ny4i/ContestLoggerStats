@@ -1,0 +1,117 @@
+{
+  "CQ-WW-SSB": {
+    "name": "CQ World Wide DX Contest SSB",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern": "^[0-9]{1,2}$",
+    "exchange_description": "CQ Zone (1-40)",
+    "scoring_type": "cq_ww",
+    "mult_description": "DXCC countries (per-band) + CQ zones (per-band)"
+  },
+  "CQ-WW-CW": {
+    "name": "CQ World Wide DX Contest CW",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern": "^[0-9]{1,2}$",
+    "exchange_description": "CQ Zone (1-40)",
+    "scoring_type": "cq_ww",
+    "mult_description": "DXCC countries (per-band) + CQ zones (per-band)"
+  },
+  "CQ-WPX-SSB": {
+    "name": "CQ WPX Contest SSB",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern": "^[0-9]{1,4}$",
+    "exchange_description": "Serial number",
+    "scoring_type": "cq_wpx",
+    "mult_description": "Unique WPX prefixes (all-band)"
+  },
+  "CQ-WPX-CW": {
+    "name": "CQ WPX Contest CW",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern": "^[0-9]{1,4}$",
+    "exchange_description": "Serial number",
+    "scoring_type": "cq_wpx",
+    "mult_description": "Unique WPX prefixes (all-band)"
+  },
+  "ARRL-FIELD-DAY": {
+    "name": "ARRL Field Day",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern": "^[0-9]{1,2}[A-Z]\\s+[A-Z]{2,3}$",
+    "exchange_description": "Class + ARRL/RAC section (e.g. 3A WCF)",
+    "scoring_type": "field_day",
+    "mult_description": "No multipliers (power multiplier not in ADIF)"
+  },
+  "WFD": {
+    "name": "Winter Field Day",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern": "^[0-9]{1,2}[A-Z]\\s+[A-Z]{2,3}$",
+    "exchange_description": "Class + section (e.g. 2O WCF)",
+    "scoring_type": "field_day",
+    "mult_description": "No multipliers (power multiplier not in ADIF)"
+  },
+  "ARRL-SS-CW": {
+    "name": "ARRL Sweepstakes CW",
+    "dupe_rule": "all_band_mode",
+    "exchange_pattern": "^[0-9]+\\s+[A-Z]\\s+[0-9]{2,4}\\s+[A-Z]{2,4}$",
+    "exchange_description": "Nr Prec Check Section (e.g. 123 A 72 CT)",
+    "scoring_type": "arrl_ss",
+    "mult_description": "ARRL/RAC sections (all-band, max 84)"
+  },
+  "ARRL-SS-SSB": {
+    "name": "ARRL Sweepstakes SSB",
+    "dupe_rule": "all_band_mode",
+    "exchange_pattern": "^[0-9]+\\s+[A-Z]\\s+[0-9]{2,4}\\s+[A-Z]{2,4}$",
+    "exchange_description": "Nr Prec Check Section (e.g. 123 A 72 CT)",
+    "scoring_type": "arrl_ss",
+    "mult_description": "ARRL/RAC sections (all-band, max 84)"
+  },
+  "NAQP-CW": {
+    "name": "North American QSO Party CW",
+    "dupe_rule": "per_band",
+    "exchange_pattern": "^[A-Z]{2,5}$",
+    "exchange_description": "State/Province/DX",
+    "scoring_type": "naqp",
+    "mult_description": "US states + Canadian provinces + DX multipliers (per-band)"
+  },
+  "NAQP-SSB": {
+    "name": "North American QSO Party SSB",
+    "dupe_rule": "per_band",
+    "exchange_pattern": "^[A-Z]{2,5}$",
+    "exchange_description": "State/Province/DX",
+    "scoring_type": "naqp",
+    "mult_description": "US states + Canadian provinces + DX multipliers (per-band)"
+  },
+  "NAQP-RTTY": {
+    "name": "North American QSO Party RTTY",
+    "dupe_rule": "per_band",
+    "exchange_pattern": "^[A-Z]{2,5}$",
+    "exchange_description": "State/Province/DX",
+    "scoring_type": "naqp",
+    "mult_description": "US states + Canadian provinces + DX multipliers (per-band)"
+  },
+  "ARRL-DX-CW": {
+    "name": "ARRL DX Contest CW",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern_wve": "^[0-9]{1,3}$",
+    "exchange_pattern_dx": "^[A-Z]{2,5}$",
+    "exchange_description": "W/VE: RST + State/Province; DX: RST + Power",
+    "scoring_type": "arrl_dx",
+    "mult_description": "W/VE: DXCC countries (per-band); DX: US states + VE provinces (per-band)"
+  },
+  "ARRL-DX-SSB": {
+    "name": "ARRL DX Contest SSB",
+    "dupe_rule": "per_band_mode",
+    "exchange_pattern_wve": "^[0-9]{1,3}$",
+    "exchange_pattern_dx": "^[A-Z]{2,5}$",
+    "exchange_description": "W/VE: RST + State/Province; DX: RST + Power",
+    "scoring_type": "arrl_dx",
+    "mult_description": "W/VE: DXCC countries (per-band); DX: US states + VE provinces (per-band)"
+  },
+  "ARRL-RTTY": {
+    "name": "ARRL RTTY Roundup",
+    "dupe_rule": "per_band",
+    "exchange_pattern_wve": "^[A-Z]{2,5}$",
+    "exchange_pattern_dx": "^[0-9]{1,4}$",
+    "exchange_description": "W/VE: State/Province; DX: Serial number",
+    "scoring_type": "arrl_rtty",
+    "mult_description": "US states + Canadian provinces + DXCC countries (per-band)"
+  }
+}

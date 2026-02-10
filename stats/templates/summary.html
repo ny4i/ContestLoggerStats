@@ -49,4 +49,15 @@
     </tr>
 </table>
 </div>
+{% if score %}
+<h3>Estimated Score</h3>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="td1"><td>QSO Points</td><td style="text-align:right"><b>{{ "{:,}".format(score.qso_points) }}</b></td></tr>
+    <tr class="td0"><td>Multipliers</td><td style="text-align:right">{{ score.multipliers }} ({{ score.mult_detail }})</td></tr>
+    <tr class="td1"><td><b>Estimated Score</b></td><td style="text-align:right"><b>{{ "{:,}".format(score.total_score) }}</b></td></tr>
+</table>
+</div>
+{% for note in score.notes %}<p><i>Note: {{ note }}</i></p>{% endfor %}
+{% endif %}
 {% endblock %}
