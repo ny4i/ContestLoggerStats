@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+    #log-search { margin: 8px 0; }
+</style>
+{% endblock %}
+{% block content %}
+<div id="log-search" class="no-print">
+    <input type="text" id="cs" class="search-box" placeholder="Search callsign..." onkeyup="filterLog(this.value)"/>
+</div>
+<div id="page-nav" style="margin:8px 0;">
+    {% for p in pages %}
+    <button class="page-link{% if p.num == 1 %} active{% endif %}" onclick="showPage({{ p.num }})">{{ p.label }}</button>
+    {% endfor %}
+</div>
+<div class="table-wrap">
+<table class="log-table">
+    <thead>
+    <tr class="thc">
+        <th>#</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Call</th>
+        <th>Band</th>
+        <th>Mode</th>
+        <th>Freq</th>
+        <th>RSTs</th>
+        <th>RSTr</th>
+        <th>Sent</th>
+        <th>Rcvd</th>
+        <th>Country</th>
+        <th>Operator</th>
+    </tr>
+    </thead>
+    <tbody id="log-body">
+    {% for qso in qso_rows %}
+    <tr class="{{ 'dupe' if qso.is_dupe else ('lcr-error' if qso.lcr_error else loop_class(loop.index)) }}" data-call="{{ qso.call }}" data-page="{{ qso.page }}">
+        <td>{{ qso.seq }}</td>
+        <td>{{ qso.date }}</td>
+        <td>{{ qso.time }}</td>
+        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ qso.call }}">{{ qso.call }}</a></td>
+        <td>{{ qso.band }}</td>
+        <td>{{ qso.mode }}</td>
+        <td>{{ qso.freq }}</td>
+        <td>{{ qso.rst_sent }}</td>
+        <td>{{ qso.rst_rcvd }}</td>
+        <td>{{ qso.stx }}</td>
+        <td>{{ qso.srx }}</td>
+        <td>{{ qso.country }}</td>
+        <td>{{ qso.operator }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+var currentPage = 1;
+function showPage(n) {
+    currentPage = n;
+    var rows = document.querySelectorAll('#log-body tr');
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].style.display = (rows[i].getAttribute('data-page') == n) ? '' : 'none';
+    }
+    var btns = document.querySelectorAll('.page-link');
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].className = 'page-link' + (btns[i].textContent.trim().split('-')[0] == (((n-1)*500)+1).toString() ? ' active' : '');
+    }
+}
+function filterLog(val) {
+    val = val.toUpperCase();
+    var rows = document.querySelectorAll('#log-body tr');
+    if (!val) { showPage(currentPage); return; }
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].style.display = rows[i].getAttribute('data-call').indexOf(val) >= 0 ? '' : 'none';
+    }
+}
+showPage(1);
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ total_unique }} unique callsigns worked.</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Callsign</th>
+        <th>QSOs</th>
+        <th>Country</th>
+        <th>Bands</th>
+    </tr>
+    {% for c in callsign_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ c.call }}">{{ c.call }}</a></td>
+        <td>{{ c.count }}</td>
+        <td>{{ c.country }}</td>
+        <td>{{ c.bands }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

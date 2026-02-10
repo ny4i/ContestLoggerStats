@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Distance (km)</th>
+        <th>QSOs</th>
+        <th>%</th>
+        <th></th>
+        {% for band in bands %}
+        <th>{{ band }}</th>
+        {% endfor %}
+    </tr>
+    {% for d in distance_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ d.label }}</td>
+        <td>{{ d.total }}</td>
+        <td><i>{{ "%.1f"|format(d.pct) }}</i></td>
+        <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(d.pct) }}px"></div></td>
+        {% for band in bands %}
+        <td>{{ d.by_band.get(band, '') or '' }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    <tr class="td1">
+        <td><b>Average</b></td>
+        <td colspan="{{ bands|length + 3 }}"><b>{{ avg_km }} km</b></td>
+    </tr>
+    <tr class="td0">
+        <td><b>Max</b></td>
+        <td colspan="{{ bands|length + 3 }}"><b>{{ max_km }} km</b> ({{ max_call }})</td>
+    </tr>
+</table>
+</div>
+{% endblock %}

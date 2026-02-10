@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="leaflet.css"/>
+<link rel="stylesheet" href="MarkerCluster.css"/>
+<link rel="stylesheet" href="MarkerCluster.Default.css"/>
+<script src="leaflet.js"></script>
+<script src="leaflet.markercluster.js"></script>
+<style>
+#map { height: 70vh; min-height: 400px; width: 100%; margin-top: 8px; }
+</style>
+{% endblock %}
+{% block content %}
+<p>{{ total_qsos }} QSOs plotted on the map. Station location: {{ station_call }} @ {{ locator }}.</p>
+<div style="margin-bottom:8px;">
+    {% for band, color in band_colors %}
+    <span class="legend-item"><span class="band-legend" style="background:{{ color }};"></span>{{ band }}</span>
+    {% endfor %}
+</div>
+<div id="map"></div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function() {
+    var map = L.map('map').setView([{{ station_lat }}, {{ station_lon }}], 3);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
+
+    // Station home marker
+    {% if station_lat != 0 or station_lon != 0 %}
+    L.marker([{{ station_lat }}, {{ station_lon }}], {
+        icon: L.divIcon({
+            className: '',
+            html: '<div style="background:#ef4444;color:#fff;font-weight:bold;padding:2px 6px;border-radius:4px;font-size:10px;white-space:nowrap;">{{ station_call }}</div>',
+            iconSize: null
+        })
+    }).addTo(map).bindPopup('<b>{{ station_call }}</b><br>{{ locator }}');
+    {% endif %}
+
+    var bandColors = {{ band_color_map_json }};
+    var markers = L.markerClusterGroup({
+        maxClusterRadius: 40,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false
+    });
+
+    var qsos = {{ qso_data_json }};
+    for (var i = 0; i < qsos.length; i++) {
+        var q = qsos[i];
+        if (q.lat === 0 && q.lon === 0) continue;
+        var color = bandColors[q.band] || '#888888';
+        var marker = L.circleMarker([q.lat, q.lon], {
+            radius: 5,
+            fillColor: color,
+            color: '#333',
+            weight: 1,
+            opacity: 0.8,
+            fillOpacity: 0.7
+        });
+        marker.bindPopup(
+            '<b>' + q.call + '</b><br>' +
+            q.band + ' ' + q.mode + '<br>' +
+            q.time + '<br>' +
+            q.country + '<br>' +
+            q.dist + ' km / ' + q.bearing + '&deg;'
+        );
+        markers.addLayer(marker);
+    }
+    map.addLayer(markers);
+})();
+</script>
+{% endblock %}

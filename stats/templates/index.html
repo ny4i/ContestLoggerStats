@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc"><th>Parameter</th><th>Value</th></tr>
+    <tr class="td1"><td>Callsign</td><td><b><a rel="nofollow" title="{{ station_call }} at QRZ.COM" href="https://www.qrz.com/db/{{ station_call }}">{{ station_call }}</a></b></td></tr>
+    <tr class="td0"><td>Country</td><td>{{ station_country }}</td></tr>
+    <tr class="td1"><td>Locator</td><td>{{ locator }}</td></tr>
+    <tr class="td0"><td>Contest</td><td>{{ contest_id }}</td></tr>
+    {% if category %}<tr class="td1"><td>Category</td><td>{{ category }}</td></tr>{% endif %}
+    <tr class="{{ loop_class(6) }}"><td>Operators</td><td><a href="operators.htm">({{ operators|length }}) {{ operators|join(' ') }}</a></td></tr>
+    <tr class="{{ loop_class(7) }}"><td>Start date</td><td>{{ start_time }}</td></tr>
+    <tr class="{{ loop_class(8) }}"><td>End date</td><td>{{ end_time }}</td></tr>
+    <tr class="{{ loop_class(9) }}"><td>Participation time</td><td>{{ participation_time }}</td></tr>
+    <tr class="{{ loop_class(10) }}"><td>Break time</td><td><a href="breaks.htm">{{ break_time }}</a></td></tr>
+    <tr class="{{ loop_class(11) }}"><td>Operating time</td><td>{{ operating_time }}</td></tr>
+    <tr class="{{ loop_class(12) }}"><td>QSOs</td><td><b><a href="summary.htm">{{ "{:,}".format(total_qsos) }}</a></b></td></tr>
+    <tr class="{{ loop_class(13) }}"><td>Dupes</td><td><a href="dupes.htm">{{ dupe_count }} ({{ "%.2f"|format(dupe_pct) }} %)</a></td></tr>
+    <tr class="{{ loop_class(14) }}"><td>Unique callsigns</td><td><a href="all_callsigns.htm">{{ "{:,}".format(unique_calls) }}</a></td></tr>
+    <tr class="{{ loop_class(15) }}"><td>QSOs per station</td><td>{{ "%.2f"|format(qsos_per_station) }}</td></tr>
+    <tr class="{{ loop_class(16) }}"><td>Kilometers per QSO</td><td><a href="distance.htm">{{ "{:,}".format(km_per_qso) }} km</a></td></tr>
+    <tr class="{{ loop_class(17) }}"><td>Countries</td><td><a href="countries.htm">{{ country_count }}</a></td></tr>
+    <tr class="{{ loop_class(18) }}"><td>Prefixes</td><td><a href="prefixes.htm">{{ prefix_count }}</a></td></tr>
+    <tr class="{{ loop_class(19) }}"><td>Moves</td><td>{{ "{:,}".format(move_count) }}</td></tr>
+    {% if software %}<tr class="{{ loop_class(20) }}"><td>Software</td><td>{{ software }}</td></tr>{% endif %}
+</table>
+</div>
+{% endblock %}

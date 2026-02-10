@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ band_label }} - QSOs by hour</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Hour</th>
+        {% for op in operators %}
+        <th title="{{ op }}">{{ op[:6] }}</th>
+        {% endfor %}
+        <th>Total</th>
+    </tr>
+    {% for h in hour_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ h.label }}</td>
+        {% for op in operators %}
+        {% set val = h.by_op.get(op, 0) %}
+        <td{% if val > 0 %} class="k{{ [val // heat_divisor + 1, 9]|min }}"{% endif %}>{{ val or '' }}</td>
+        {% endfor %}
+        <td><b>{{ h.total }}</b></td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

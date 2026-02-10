@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Zone</th>
+        <th>QSOs</th>
+        <th>%</th>
+        <th></th>
+        {% for mg in mode_groups %}
+        <th>{{ mg }}</th>
+        {% endfor %}
+        <th>Countries</th>
+    </tr>
+    {% for z in zone_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ z.zone }}</td>
+        <td>{{ z.total }}</td>
+        <td><i>{{ "%.1f"|format(z.pct) }}</i></td>
+        <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(z.pct) }}px"></div></td>
+        {% for mg in mode_groups %}
+        <td>{{ z.by_mode.get(mg, '') or '' }}</td>
+        {% endfor %}
+        <td>{{ z.countries }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

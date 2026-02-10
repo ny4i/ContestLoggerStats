@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ total_break_mins }} minutes of break time in {{ break_count }} breaks (gaps &gt; {{ gap_threshold }} minutes).</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Duration</th>
+        <th>Before</th>
+        <th>After</th>
+    </tr>
+    {% for b in break_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td>{{ b.start }}</td>
+        <td>{{ b.end }}</td>
+        <td>{{ b.duration }} min</td>
+        <td>{{ b.before_band }} {{ b.before_mode }}</td>
+        <td>{{ b.after_band }} {{ b.after_mode }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

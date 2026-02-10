@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="generator" content="ContestStats"/>
+    <title>{{ page_title }} - {{ contest_title }} - ContestStats</title>
+    <link rel="stylesheet" href="style.css" type="text/css"/>
+    {% block head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+    <a accesskey="1" href="index.htm">
+        <span class="tot"><b class="brand">Stats</b>&nbsp;&nbsp;<sup>{{ contest_year }}</sup> {{ contest_id }} <span style="color:#ef4444">{{ station_call }}</span></span>
+    </a>
+    <div class="header-nav no-print">
+        {% if prev_page %}
+        <a class="prev_next" accesskey="z" title="Previous: {{ prev_page.title }}" href="{{ prev_page.filename }}">&lt; Prev</a>
+        {% endif %}
+        {% if next_page %}
+        <a class="prev_next" accesskey="x" title="Next: {{ next_page.title }}" href="{{ next_page.filename }}">Next &gt;</a>
+        {% endif %}
+        <button class="menu-toggle" onclick="document.body.classList.toggle('sidebar-open')" aria-label="Menu">&#9776;</button>
+    </div>
+</header>
+<div class="layout">
+    <nav class="sidebar no-print">
+        <ol>
+            {% for nav in nav_pages %}
+            {% if nav.filename == current_filename %}
+            <li class="sli">{{ nav.title }}</li>
+            {% elif nav.is_child %}
+            <li class="cli"><a href="{{ nav.filename }}">{{ nav.title }}</a></li>
+            {% else %}
+            <li class="mli"><a href="{{ nav.filename }}">{{ nav.title }}</a></li>
+            {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+    <div class="sidebar-overlay no-print" onclick="document.body.classList.remove('sidebar-open')"></div>
+    <main>
+        <div class="gradient">&nbsp;{{ page_title }}</div>
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<footer class="site-footer no-print">
+    Created by ContestStats
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

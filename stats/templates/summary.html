@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc" style="text-align:right;">
+    <tr class="thc">
+        <th rowspan="2">Band</th>
+        {% for mg in mode_groups %}
+        <th colspan="3">{{ mg }}</th>
+        {% endfor %}
+        <th colspan="3">All</th>
+        <th rowspan="2">Countries</th>
+    </tr>
+    <tr class="thc">
+        {% for mg in mode_groups %}
+        <th>QSOs</th><th colspan="2">%</th>
+        {% endfor %}
+        <th>QSOs</th><th colspan="2">%</th>
+    </tr>
+    {% for band_row in band_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td><b>{{ band_row.label }}</b></td>
+        {% for mg in mode_groups %}
+        {% set count = band_row.by_mode.get(mg, 0) %}
+        {% if count > 0 %}
+        <td>{{ count }}</td>
+        <td><i>{{ "%.1f"|format(count / total_qsos * 100) }}</i></td>
+        <td title="{{ count }} Qs - {{ "%.1f"|format(count / total_qsos * 100) }}%" style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(count / total_qsos * 100) }}px"></div></td>
+        {% else %}
+        <td colspan="3"></td>
+        {% endif %}
+        {% endfor %}
+        <td>{{ band_row.total }}</td>
+        <td><i>{{ "%.1f"|format(band_row.total / total_qsos * 100) }}</i></td>
+        <td title="{{ band_row.total }} Qs - {{ "%.1f"|format(band_row.total / total_qsos * 100) }}%" style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(band_row.total / total_qsos * 100) }}px"></div></td>
+        <td>{{ band_row.countries }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="td1">
+        <td><b>All</b></td>
+        {% for mg in mode_groups %}
+        <td>{{ totals_by_mode.get(mg, 0) }}</td>
+        <td><i>{{ "%.1f"|format(totals_by_mode.get(mg, 0) / total_qsos * 100) }}</i></td>
+        <td title="{{ totals_by_mode.get(mg, 0) }} Qs" style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(totals_by_mode.get(mg, 0) / total_qsos * 100) }}px"></div></td>
+        {% endfor %}
+        <td>{{ total_qsos }}</td>
+        <td><i>100.0</i></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+</div>
+{% endblock %}

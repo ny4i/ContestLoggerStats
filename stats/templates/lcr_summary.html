@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ total_errors }} LCR errors found ({{ matched_errors }} matched to QSOs).</p>
+
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Error Type</th>
+        <th>Count</th>
+        <th>%</th>
+    </tr>
+    {% for row in type_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ row.type }}</td>
+        <td>{{ row.count }}</td>
+        <td>{{ "%.1f"|format(row.pct) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+<h3>Errors by Operator</h3>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Operator</th>
+        <th>Errors</th>
+        <th>QSOs</th>
+        <th>Error %</th>
+    </tr>
+    {% for row in operator_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ row.operator }}</td>
+        <td>{{ row.errors }}</td>
+        <td>{{ row.qsos }}</td>
+        <td>{{ "%.1f"|format(row.pct) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+<h3>Error Details</h3>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Call</th>
+        <th>Band</th>
+        <th>Mode</th>
+        <th>Error</th>
+        <th>Detail</th>
+        <th>Operator</th>
+    </tr>
+    {% for q in error_qsos %}
+    <tr class="lcr-error">
+        <td>{{ loop.index }}</td>
+        <td>{{ q.date }}</td>
+        <td>{{ q.time }}</td>
+        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ q.call }}">{{ q.call }}</a></td>
+        <td>{{ q.band }}</td>
+        <td>{{ q.mode }}</td>
+        <td>{{ q.error }}</td>
+        <td>{{ q.detail }}</td>
+        <td>{{ q.operator }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

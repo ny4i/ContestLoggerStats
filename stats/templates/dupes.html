@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ dupe_count }} duplicate QSOs found ({{ "%.2f"|format(dupe_pct) }}% of {{ total_qsos }} total).</p>
+<div class="table-wrap">
+<table class="log-table">
+    <tr class="thc">
+        <th>#</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Call</th>
+        <th>Band</th>
+        <th>Mode</th>
+        <th>Freq</th>
+        <th>Sent</th>
+        <th>Rcvd</th>
+        <th>Operator</th>
+    </tr>
+    {% for qso in dupe_qsos %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ qso.seq }}</td>
+        <td>{{ qso.date }}</td>
+        <td>{{ qso.time }}</td>
+        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ qso.call }}">{{ qso.call }}</a></td>
+        <td>{{ qso.band }}</td>
+        <td>{{ qso.mode }}</td>
+        <td>{{ qso.freq }}</td>
+        <td>{{ qso.stx }}</td>
+        <td>{{ qso.srx }}</td>
+        <td>{{ qso.operator }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

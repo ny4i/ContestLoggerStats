@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block head %}
+<script src="chart.js"></script>
+{% endblock %}
+{% block content %}
+<p>{{ description }}</p>
+{% if chart_type == 'doughnut' or chart_type == 'polar' %}
+<div class="chart-wrap">
+    <canvas id="mainChart"></canvas>
+</div>
+{% elif chart_type == 'horizontal_bar' %}
+<div class="chart-wrap-wide" style="max-width:800px;">
+    <canvas id="mainChart"></canvas>
+</div>
+{% elif chart_type == 'bar' %}
+<div class="chart-wrap-wide">
+    <canvas id="mainChart"></canvas>
+</div>
+{% endif %}
+{% if detail_table %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        {% for h in detail_headers %}
+        <th>{{ h }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in detail_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        {% for cell in row %}
+        <td>{{ cell }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+(function() {
+    var ctx = document.getElementById('mainChart').getContext('2d');
+    var chartData = {{ chart_data_json }};
+    new Chart(ctx, chartData);
+})();
+</script>
+{% endblock %}

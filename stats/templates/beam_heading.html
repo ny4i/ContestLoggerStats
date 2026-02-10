@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Heading</th>
+        <th>QSOs</th>
+        <th>%</th>
+        <th></th>
+        {% for band in bands %}
+        <th>{{ band }}</th>
+        {% endfor %}
+    </tr>
+    {% for b in heading_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ b.label }}</td>
+        <td>{{ b.total }}</td>
+        <td><i>{{ "%.1f"|format(b.pct) }}</i></td>
+        <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(b.pct) }}px"></div></td>
+        {% for band in bands %}
+        <td>{{ b.by_band.get(band, '') or '' }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Band/Mode</th>
+        <th>QSOs</th>
+        <th>%</th>
+        <th></th>
+        {% for op in operators %}
+        <th title="{{ op }}">{{ op[:6] }}</th>
+        {% endfor %}
+    </tr>
+    {% for s in station_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ s.label }}</td>
+        <td>{{ s.total }}</td>
+        <td><i>{{ "%.1f"|format(s.pct) }}</i></td>
+        <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(s.pct) }}px"></div></td>
+        {% for op in operators %}
+        <td>{{ s.by_op.get(op, '') or '' }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ total_passed }} QSOs were passed between operators (same callsign, different bands or modes).</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Callsign</th>
+        <th>QSOs</th>
+        <th>Bands</th>
+        <th>Operators</th>
+    </tr>
+    {% for p in passed_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ p.call }}">{{ p.call }}</a></td>
+        <td>{{ p.count }}</td>
+        <td>{{ p.bands }}</td>
+        <td>{{ p.operators }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

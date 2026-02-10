@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Operator</th>
+        <th>QSOs</th>
+        <th>%</th>
+        <th></th>
+        <th>CW</th>
+        <th>DIG</th>
+        <th>PH</th>
+        <th>Countries</th>
+        <th>Dupes</th>
+        {% if has_lcr %}<th>Errors</th>{% endif %}
+    </tr>
+    {% for op in operator_stats %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td><a rel="nofollow" href="https://www.qrz.com/db/{{ op.call }}">{{ op.call }}</a></td>
+        <td>{{ op.total }}</td>
+        <td><i>{{ "%.1f"|format(op.pct) }}</i></td>
+        <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(op.pct) }}px"></div></td>
+        <td>{{ op.cw or '' }}</td>
+        <td>{{ op.dig or '' }}</td>
+        <td>{{ op.ph or '' }}</td>
+        <td>{{ op.countries }}</td>
+        <td>{{ op.dupes or '' }}</td>
+        {% if has_lcr %}<td class="{{ 'err' if op.errors else '' }}">{{ op.errors or '' }}</td>{% endif %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

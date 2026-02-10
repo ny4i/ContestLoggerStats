@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ band_label }} - Countries worked by hour</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Country</th>
+        <th>Total</th>
+        {% for h in hours %}
+        <th>{{ "%02d"|format(h) }}</th>
+        {% endfor %}
+    </tr>
+    {% for c in country_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td>{{ c.name }}</td>
+        <td><b>{{ c.total }}</b></td>
+        {% for h in hours %}
+        {% set val = c.by_hour.get(h, 0) %}
+        <td{% if val > 0 %} class="k{{ [val, 9]|min }}"{% endif %}>{{ val or '' }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

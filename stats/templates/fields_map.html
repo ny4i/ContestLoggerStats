@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ total_fields }} Maidenhead grid fields worked ({{ "%.1f"|format(field_pct) }}% of 324 possible).</p>
+<div class="table-wrap">
+<table class="mtc" style="width:auto;">
+    <tr class="thc">
+        <th></th>
+        {% for col in field_cols %}
+        <th class="grid-cell">{{ col }}</th>
+        {% endfor %}
+    </tr>
+    {% for row_label, row_data in field_rows %}
+    <tr>
+        <td class="thc grid-cell">{{ row_label }}</td>
+        {% for col in field_cols %}
+        {% set val = row_data.get(col, 0) %}
+        <td class="grid-cell{% if val > 9 %} grid-cell-hot3{% elif val > 4 %} grid-cell-hot2{% elif val > 0 %} grid-cell-hot1{% endif %}">{{ val or '' }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

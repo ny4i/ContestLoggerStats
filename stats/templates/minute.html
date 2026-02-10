@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ subtitle }}</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Time</th>
+        <th>QSOs</th>
+        <th>Call</th>
+        <th>Band</th>
+        <th>Mode</th>
+    </tr>
+    {% for m in minute_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td>{{ m.time }}</td>
+        <td>{{ m.count }}</td>
+        <td>{{ m.calls }}</td>
+        <td>{{ m.band }}</td>
+        <td>{{ m.mode }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}
