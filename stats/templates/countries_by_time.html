@@ -14,7 +14,7 @@
     {% for c in country_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td>{{ c.name }}</td>
+        <td class="tal">{{ c.name }}</td>
         <td><b>{{ c.total }}</b></td>
         {% for h in hours %}
         {% set val = c.by_hour.get(h, 0) %}

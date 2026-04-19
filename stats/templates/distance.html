@@ -3,7 +3,7 @@
 <div class="table-wrap">
 <table class="mtc">
     <tr class="thc">
-        <th>Distance (km)</th>
+        <th>Distance ({{ dist_unit }})</th>
         <th>QSOs</th>
         <th>%</th>
         <th></th>
@@ -13,7 +13,7 @@
     </tr>
     {% for d in distance_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ d.label }}</td>
+        <td class="tal">{{ d.label }}</td>
         <td>{{ d.total }}</td>
         <td><i>{{ "%.1f"|format(d.pct) }}</i></td>
         <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(d.pct) }}px"></div></td>
@@ -23,12 +23,12 @@
     </tr>
     {% endfor %}
     <tr class="td1">
-        <td><b>Average</b></td>
-        <td colspan="{{ bands|length + 3 }}"><b>{{ avg_km }} km</b></td>
+        <td class="tal"><b>Average</b></td>
+        <td colspan="{{ bands|length + 3 }}"><b>{{ avg_km }} {{ dist_unit }}</b></td>
     </tr>
     <tr class="td0">
-        <td><b>Max</b></td>
-        <td colspan="{{ bands|length + 3 }}"><b>{{ max_km }} km</b> (<a rel="nofollow" target="_blank" href="{{ callsign_url(max_call) }}">{{ max_call }}</a>)</td>
+        <td class="tal"><b>Max</b></td>
+        <td colspan="{{ bands|length + 3 }}"><b>{{ max_km }} {{ dist_unit }}</b> (<a rel="nofollow noopener noreferrer" target="_blank" href="{{ callsign_url(max_call) }}">{{ max_call }}</a>)</td>
     </tr>
 </table>
 </div>

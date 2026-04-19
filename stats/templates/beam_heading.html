@@ -13,7 +13,7 @@
     </tr>
     {% for b in heading_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ b.label }}</td>
+        <td class="tal">{{ b.label }}</td>
         <td>{{ b.total }}</td>
         <td><i>{{ "%.1f"|format(b.pct) }}</i></td>
         <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(b.pct) }}px"></div></td>

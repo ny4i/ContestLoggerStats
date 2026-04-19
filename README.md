@@ -9,11 +9,11 @@ Parses an ADIF file, enriches QSOs with country/prefix/distance data from `cty.d
 - ADIF parsing with mode-group classification (CW/PH/DIG)
 - Country, continent, CQ/ITU zone lookup via `cty.dat`
 - WPX prefix extraction
-- Duplicate detection (per-band-mode or per-band rules)
-- Distance and beam heading calculation from Maidenhead locator
+- Duplicate detection (per-band-mode, per-band, or all-band-mode); POTA-aware (N-fer hunts at different parks are not dupes)
+- Distance and beam heading in km or miles (defaults to mi for US callsigns)
 - Operator privacy/anonymization mode
-- MASTER.SCP checking (auto-downloads if not found)
-- LOTW user activity checking (auto-downloads if not found)
+- MASTER.SCP / LOTW / FCC ULS / Census ZCTA / BigCTY downloaded on demand via `--update-data`
+- POTA park-grid override for portable ops; Parks page with per-park stats; clickable `pota.app` links on the map
 - LCR (Log Checking Report) error overlay (HTML and PDF formats)
 - Configurable callsign lookup hyperlinks (QRZ or HamQTH)
 - KMZ export for Google Earth
@@ -24,7 +24,7 @@ Parses an ADIF file, enriches QSOs with country/prefix/distance data from `cty.d
 Requires Python 3.8+.
 
 ```bash
-pip install jinja2
+pip install -r requirements.txt
 ```
 
 Optional, for PDF LCR support:
@@ -34,6 +34,16 @@ pip install pypdf
 ```
 
 ## Usage
+
+### First-run setup
+
+All data files live in `./databases/`. Fetch them once:
+
+```bash
+python generate_stats.py --update-data
+```
+
+This downloads BigCTY (`cty.dat` + `cty.csv`), `MASTER.SCP`, the LOTW user list, the FCC ULS amateur database, and Census ZCTA centroids into `./databases/`. `cty.dat` is **required**; the script faults with a pointer to `--update-data` if it is missing.
 
 ### Statistics Generator
 
@@ -45,24 +55,32 @@ python generate_stats.py <adif_file> [options]
 
 | Option | Description |
 |--------|-------------|
-| `--output-dir`, `-o` | Output directory (default: `./stats_output`) |
+| `--update-data` | Download/refresh all data files into `./databases/` and exit |
+| `--output-dir`, `-o` | Output directory (default: auto-named under `./stats_output/`) |
 | `--callsign`, `-c` | Station callsign (overrides ADIF header) |
 | `--locator`, `-l` | Station Maidenhead locator (overrides ADIF header) |
 | `--contest` | Contest name (overrides ADIF header) |
-| `--cty-dat` | Path to `cty.dat` file |
+| `--cty-dat` | Path to `cty.dat` file (overrides `./databases/cty.dat`) |
 | `--hide-operators` | Anonymize operator names in output |
-| `--dupe-rule` | Dupe detection: `per_band_mode` (default) or `per_band` |
+| `--dupe-rule` | Dupe detection: `per_band_mode` (default), `per_band`, or `all_band_mode` |
 | `--lcr` | Path to LCR file for error overlay |
 | `--master-scp` | Path to `MASTER.SCP` file |
 | `--lotw` | Path to LOTW user activity CSV file |
-| `--no-download` | Skip auto-download of MASTER.SCP and LOTW files |
+| `--no-download` | Skip auto-download of `MASTER.SCP` and LOTW when missing |
 | `--callsign-lookup` | Callsign lookup service: `qrz` (default) or `hamqth` |
+| `--no-qrz` | Skip QRZ.com lookups for grid squares |
+| `--qrz-cfg` | Path to QRZ settings file (default: `~/qrz_settings.cfg`) |
+| `--units` | Distance units `km` or `mi` (default: `mi` for US callsigns, else `km`) |
+| `--photos` | Directory of operator portraits (matched by callsign stem; prefers `.jpg` over `.png`) |
+| `--remote` | Remote `user@host:/path` for a hint-only scp command in the output |
 
 **Example:**
 
 ```bash
-python generate_stats.py mylog.adi -o ./output -c W4TA -l EM73 --lcr errors.lcr
+python generate_stats.py mylog.adi -c W4TA -l EM73 --lcr errors.lcr
 ```
+
+Output directory is auto-named (e.g. `stats_output/2026-APR-18-POTA-US-1880-W4AFC/` for a POTA activation, or `stats_output/2026-APR-W4TA-ARRL-FIELD-DAY/` otherwise). Override with `-o`.
 
 ### LCR Error Analyzer
 
@@ -76,11 +94,17 @@ Supports `.lcr`, `.html`, and `.pdf` LCR formats.
 
 ## Reference Data
 
-| File | Source | Auto-download |
-|------|--------|--------------|
-| `cty.dat` | [country-files.com](https://www.country-files.com/) | No — searches common locations or use `--cty-dat` |
-| `MASTER.SCP` | [supercheckpartial.com](http://www.supercheckpartial.com/) | Yes (cached in `~/.cache/contest-stats/`) |
-| LOTW users | [ARRL LOTW](https://lotw.arrl.org/lotw-user-activity.csv) | Yes (cached in `~/.cache/contest-stats/`) |
+All data files live in `./databases/` (gitignored). Populate with `python generate_stats.py --update-data`.
+
+| File | Source | Required |
+|------|--------|----------|
+| `cty.dat`, `cty.csv` | [country-files.com BigCTY](https://www.country-files.com/bigcty/download/bigcty.zip) | Yes — script faults without `cty.dat` |
+| `MASTER.SCP` | [supercheckpartial.com](http://www.supercheckpartial.com/) | No (used for "Not in master") |
+| LOTW users | [ARRL LOTW](https://lotw.arrl.org/lotw-user-activity.csv) | No (LOTW check page skipped when absent) |
+| `fcc_amateur.db` | Built from [FCC ULS](https://data.fcc.gov/download/pub/uls/complete/l_amat.zip) by `fcc_uls_to_sqlite.py` | No (US callsigns fall through to QRZ) |
+| `zcta_centroids.csv` | [U.S. Census Gazetteer](https://www2.census.gov/geo/docs/maps-data/data/gazetteer/) | No (used by FCC zip→grid) |
+| `pota_parks.csv` | [pota.app](https://pota.app/all_parks_ext.csv) — lazy-loaded only when the ADIF has POTA refs | No (auto-downloaded on first POTA log) |
+| `vuccgrids.dat` | TQSL (manual placement) | No (DXCC grid validation disabled when absent) |
 
 ## Output Pages
 
@@ -91,10 +115,37 @@ Index, Summary, Full Log, Operators, Dupes
 All Callsigns, Rates, Countries, Countries by Time (all + per-band), QSOs per Station, Passed QSOs, QSOs by Hour (sheet + graphs, all + per-band), QSOs by Minute, One Minute Rates, Prefixes, Distance, Beam Heading, Break Time, Continents, Fields Map, Callsign Length, Callsign Structure, CQ Zones, ITU Zones, Not in Master, Possible Errors, LOTW Check
 
 **Charts & Maps:**
-QSOs by Band, Top 10 Countries, Continents, Beam Heading, Frequencies, Interactive Map, KMZ Export
+QSOs by Band, QSOs by Mode, Top 10 Countries, Continents, Beam Heading, Frequencies, Interactive Map, KMZ Export
+
+**POTA (only when the ADIF contains POTA references):**
+Parks page (activator- and hunter-side tables with park name / grid / state / QSO count), pota.app links on map popups, park-grid overrides for portable ops, POTA-aware dupe detection, auto-named output directory with date + activated park
 
 **Optional:**
 LCR Error Summary (when `--lcr` provided)
+
+## Hardening the hosted output
+
+The generated pages already include a CSP meta tag, `rel="noopener noreferrer"` on external links, and a `referrer` policy. Clickjacking protection (`frame-ancestors` / `X-Frame-Options`) **must be set as an HTTP response header** — meta-tag equivalents are ignored by browsers. Set these once at your webserver level; they'll cover every log you publish.
+
+**Apache** (site config or `.htaccess` with `AllowOverride All`):
+
+```apache
+Header always set X-Frame-Options "DENY"
+Header always set Content-Security-Policy "frame-ancestors 'none';"
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+```
+
+**nginx** (inside the `server` block):
+
+```nginx
+add_header X-Frame-Options "DENY" always;
+add_header Content-Security-Policy "frame-ancestors 'none';" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+```
+
+If you serve over HTTPS, also set HSTS (`Strict-Transport-Security: max-age=63072000; includeSubDomains`) once you're confident the cert is stable.
 
 ## Testing
 
@@ -107,4 +158,4 @@ The test suite includes a bundled `cty.dat` in `tests/data/` so no external file
 
 ## License
 
-MIT
+GPL-3.0. See [LICENSE](LICENSE).

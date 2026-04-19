@@ -4,6 +4,8 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="generator" content="ContestStats"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://*.tile.openstreetmap.org; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.tile.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"/>
+    <meta name="referrer" content="strict-origin-when-cross-origin"/>
     <title>{{ page_title }} - {{ contest_title }} - ContestStats</title>
     <link rel="stylesheet" href="style.css" type="text/css"/>
     {% block head %}{% endblock %}
@@ -11,7 +13,7 @@
 <body>
 <header class="site-header">
     <a accesskey="1" href="index.htm">
-        <span class="tot"><b class="brand">Stats</b>&nbsp;&nbsp;<sup>{{ contest_year }}</sup> {{ contest_id }} <span style="color:#ef4444">{{ station_call }}</span></span>
+        <span class="tot"><b class="brand">Stats</b>&nbsp;&nbsp;{% if activated_park %}{{ activated_park_date }} POTA <span style="color:#10b981">{{ activated_park }}</span> <span style="color:#ef4444">{{ station_call }}</span>{% else %}<sup>{{ contest_year }}</sup> {{ contest_id }} <span style="color:#ef4444">{{ station_call }}</span>{% endif %}</span>
     </a>
     <div class="header-nav no-print">
         {% if prev_page %}

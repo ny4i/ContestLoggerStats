@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+{% if activated_rows %}
+<h3>Parks activated ({{ activated_rows|length }}) — {{ activated_total }} QSOs</h3>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Ref</th>
+        <th>Name</th>
+        <th>Grid</th>
+        <th>Location</th>
+        <th>QSOs</th>
+    </tr>
+    {% for r in activated_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td class="tal">{{ r.ref }}</td>
+        <td class="tal">{% if r.known %}{{ r.name }}{% else %}<i style="color:#888">(unknown)</i>{% endif %}</td>
+        <td>{{ r.grid }}</td>
+        <td>{{ r.location }}</td>
+        <td>{{ r.count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endif %}
+
+{% if hunted_rows %}
+<h3>Parks hunted ({{ hunted_rows|length }}) — {{ hunted_total }} QSOs</h3>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>#</th>
+        <th>Ref</th>
+        <th>Name</th>
+        <th>Grid</th>
+        <th>Location</th>
+        <th>QSOs</th>
+    </tr>
+    {% for r in hunted_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td>{{ loop.index }}</td>
+        <td class="tal">{{ r.ref }}</td>
+        <td class="tal">{% if r.known %}{{ r.name }}{% else %}<i style="color:#888">(unknown)</i>{% endif %}</td>
+        <td>{{ r.grid }}</td>
+        <td>{{ r.location }}</td>
+        <td>{{ r.count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endif %}
+
+{% if not activated_rows and not hunted_rows %}
+<p>No POTA park references found in this log.</p>
+{% endif %}
+{% endblock %}

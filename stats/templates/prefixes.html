@@ -12,9 +12,9 @@
     {% for p in prefix_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td>{{ p.prefix }}</td>
+        <td class="tal">{{ p.prefix }}</td>
         <td>{{ p.count }}</td>
-        <td>{{ p.country }}</td>
+        <td class="tal">{{ p.country }}</td>
     </tr>
     {% endfor %}
 </table>

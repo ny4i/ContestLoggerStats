@@ -10,3 +10,8 @@ stats_output/
 *.adi
 *.lcr
 *.pdf
+pota_parks.csv
+operatorPictures/
+stats_output/
+databases/
+test_output/

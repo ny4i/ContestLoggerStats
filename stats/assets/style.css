@@ -148,8 +148,11 @@ main {
     width: 100%;
     border-collapse: collapse;
     margin: 8px 0 16px;
-    text-align: left;
 }
+.mtc td { text-align: center; }
+.mtc.kv td { text-align: left; }
+.mtc td.tal, .mtc th.tal { text-align: left; }
+.tal { text-align: left; }
 
 .thc {
     background: #2563eb;

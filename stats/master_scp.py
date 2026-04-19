@@ -9,23 +9,9 @@ CACHE_DIR = os.path.expanduser("~/.publicLogProcessor")
 
 
 def find_master_scp(cli_path: str | None = None) -> str | None:
-    """Search for MASTER.SCP in priority order, return path or None.
-
-    Search order:
-    1. cli_path (if provided)
-    2. ./MASTER.SCP in current directory
-    3. ~/.publicLogProcessor/MASTER.SCP
-    """
-    candidates = []
-    if cli_path:
-        candidates.append(cli_path)
-    candidates.append(os.path.join(".", MASTER_SCP_FILENAME))
-    candidates.append(os.path.join(CACHE_DIR, MASTER_SCP_FILENAME))
-
-    for path in candidates:
-        if os.path.isfile(path):
-            return path
-    return None
+    """Return MASTER.SCP path from ./databases/ (or CLI override)."""
+    from .paths import find_data_file
+    return find_data_file(MASTER_SCP_FILENAME, cli_path)
 
 
 def download_master_scp(dest_dir: str) -> str:

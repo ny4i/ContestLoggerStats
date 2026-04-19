@@ -16,11 +16,16 @@ def find_dupes(qsos: list[QSO], rule: str = "per_band_mode") -> int:
 
     for i, qso in enumerate(qsos):
         if rule == "all_band_mode":
-            key = (qso.call,)
+            base = (qso.call,)
         elif rule == "per_band":
-            key = (qso.call, qso.band)
+            base = (qso.call, qso.band)
         else:
-            key = (qso.call, qso.band, qso.mode_group)
+            base = (qso.call, qso.band, qso.mode_group)
+
+        # POTA refs split the key: working the same station at a different
+        # park (either side of the QSO) is not a dupe. Non-POTA logs have
+        # empty refs so this is a no-op for them.
+        key = base + (qso.pota_ref, qso.my_pota_ref)
 
         if key in seen:
             qso.is_dupe = True

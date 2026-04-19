@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 
 from .contest_data import QSO
+from .pota_lookup import extract_pota_refs
 
 # Mode group mapping
 _MODE_GROUPS = {
@@ -111,7 +112,8 @@ def parse_adif(filepath: str) -> tuple[dict[str, str], list[QSO]]:
     # Extract station metadata from header or first QSO
     if raw_qsos:
         first = raw_qsos[0]
-        for key in ('STATION_CALLSIGN', 'CONTEST_ID', 'MY_GRIDSQUARE', 'MY_ARRL_SECT'):
+        for key in ('STATION_CALLSIGN', 'CONTEST_ID', 'MY_GRIDSQUARE', 'MY_ARRL_SECT',
+                    'MY_POTA_REF', 'MY_SIG', 'MY_SIG_INFO'):
             if key not in header and key in first:
                 header[key] = first[key]
 
@@ -130,6 +132,7 @@ def parse_adif(filepath: str) -> tuple[dict[str, str], list[QSO]]:
         except ValueError:
             continue
 
+        my_refs, their_refs = extract_pota_refs(raw)
         qso = QSO(
             call=raw.get('CALL', '').upper(),
             band=band,
@@ -143,6 +146,11 @@ def parse_adif(filepath: str) -> tuple[dict[str, str], list[QSO]]:
             stx=raw.get('STX_STRING', raw.get('STX', '')),
             srx=raw.get('SRX_STRING', raw.get('SRX', '')),
             grid=raw.get('GRIDSQUARE', ''),
+            dxcc=int(raw.get('DXCC', '0') or '0'),
+            state=raw.get('STATE', ''),
+            cnty=raw.get('CNTY', ''),
+            pota_ref=",".join(their_refs),
+            my_pota_ref=",".join(my_refs),
         )
         qsos.append(qso)
 

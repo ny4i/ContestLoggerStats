@@ -7,10 +7,19 @@ import json
 from collections import Counter, defaultdict
 from datetime import timedelta
 from ..contest_data import ContestLog, QSO
-from ..cty_dat import extract_wpx_prefix
+from ..cty_dat import extract_wpx_prefix, get_us_call_area_grid
+from ..geo import grid_to_latlon, haversine_km, bearing_deg
+
+_KM_TO_MI = 0.621371
+
+def _dist_unit_label(unit: str) -> tuple[str, str, float]:
+    """Return (short, long, factor): 'mi'/'Miles'/0.6214 or 'km'/'Kilometers'/1.0."""
+    if unit == 'mi':
+        return 'mi', 'Miles', _KM_TO_MI
+    return 'km', 'Kilometers', 1.0
 
 
-def prepare_index(log: ContestLog, score_result=None) -> dict:
+def prepare_index(log: ContestLog, score_result=None, distance_unit: str = 'km') -> dict:
     """Main dashboard page data."""
     total = len(log.qsos)
     dupes = sum(1 for q in log.qsos if q.is_dupe)
@@ -19,6 +28,11 @@ def prepare_index(log: ContestLog, score_result=None) -> dict:
     prefixes = len({extract_wpx_prefix(q.call) for q in log.qsos})
     total_km = sum(q.distance_km for q in log.qsos if q.distance_km > 0)
     non_zero_dist = sum(1 for q in log.qsos if q.distance_km > 0)
+    unit_short, unit_long, unit_factor = _dist_unit_label(distance_unit)
+
+    # Rank operators by QSO count desc, alpha on ties
+    op_counts = Counter(q.operator for q in log.qsos if q.operator)
+    operators_ranked = sorted(op_counts.keys(), key=lambda op: (-op_counts[op], op))
 
     # Moves: band/mode changes between consecutive QSOs
     moves = 0
@@ -50,7 +64,7 @@ def prepare_index(log: ContestLog, score_result=None) -> dict:
         'station_country': log.qsos[0].country if log.qsos and log.qsos[0].country else '',
         'locator': log.locator,
         'category': log.category,
-        'operators': log.operators,
+        'operators': operators_ranked,
         'start_time': log.start_time.strftime('%d-%b-%Y %H:%M'),
         'end_time': log.end_time.strftime('%d-%b-%Y %H:%M'),
         'participation_time': f"{fmt_hhmm(total_mins)} ({total_mins} min.)",
@@ -61,7 +75,9 @@ def prepare_index(log: ContestLog, score_result=None) -> dict:
         'dupe_pct': (dupes / total * 100) if total else 0,
         'unique_calls': unique_calls,
         'qsos_per_station': total / unique_calls if unique_calls else 0,
-        'km_per_qso': int(total_km / non_zero_dist) if non_zero_dist else 0,
+        'km_per_qso': int(total_km * unit_factor / non_zero_dist) if non_zero_dist else 0,
+        'dist_unit': unit_short,
+        'dist_unit_long': unit_long,
         'country_count': countries,
         'prefix_count': prefixes,
         'move_count': moves,
@@ -165,6 +181,44 @@ def prepare_operators(log: ContestLog,
         'operator_stats': stats,
         'has_lcr': has_lcr,
         'has_photos': bool(photo_map),
+    }
+
+
+def prepare_parks(log: ContestLog, pota_lookup) -> dict:
+    """POTA parks page: activator-side and hunter-side park tables.
+
+    pota_lookup must be a POTALookup instance (or None when no POTA data loaded).
+    Each section: ref / name / grid / location / QSOs. Missing refs (present in
+    log but not in the CSV) are rendered with blank metadata, marked unknown.
+    """
+    def _rows_for(ref_attr: str) -> list[dict]:
+        counts: Counter = Counter()
+        for q in log.qsos:
+            field = getattr(q, ref_attr, "") or ""
+            for ref in (r.strip().upper() for r in field.split(",") if r.strip()):
+                counts[ref] += 1
+        rows = []
+        for ref, n in counts.items():
+            park = pota_lookup.park_for(ref) if pota_lookup else None
+            rows.append({
+                'ref': ref,
+                'name': park.name if park else '',
+                'grid': park.grid if park else '',
+                'location': park.location_desc if park else '',
+                'count': n,
+                'known': park is not None,
+            })
+        rows.sort(key=lambda r: (-r['count'], r['ref']))
+        return rows
+
+    activated = _rows_for('my_pota_ref')
+    hunted = _rows_for('pota_ref')
+
+    return {
+        'activated_rows': activated,
+        'hunted_rows': hunted,
+        'activated_total': sum(r['count'] for r in activated),
+        'hunted_total': sum(r['count'] for r in hunted),
     }
 
 
@@ -346,28 +400,35 @@ def prepare_zones(log: ContestLog, zone_type: str = 'cq') -> dict:
     return {'zone_rows': rows, 'mode_groups': mode_groups}
 
 
-def prepare_distance(log: ContestLog) -> dict:
-    """Distance histogram in 500km bins."""
+def prepare_distance(log: ContestLog, distance_unit: str = 'km') -> dict:
+    """Distance histogram in 500-unit bins (units per --units flag)."""
     bands = log.active_bands
     bin_size = 500
-    max_dist = max((q.distance_km for q in log.qsos if q.distance_km > 0), default=0)
+    unit_short, _, unit_factor = _dist_unit_label(distance_unit)
+
+    def _conv(km: float) -> float:
+        return km * unit_factor
+
+    max_dist = max((_conv(q.distance_km) for q in log.qsos if q.distance_km > 0),
+                   default=0)
     num_bins = int(max_dist / bin_size) + 1
 
     bins = defaultdict(lambda: defaultdict(int))
-    total_km = 0
+    total_dist = 0.0
     total_count = 0
-    max_km = 0
+    max_dist_val = 0.0
     max_call = ''
 
     for q in log.qsos:
         if q.distance_km > 0:
-            b = int(q.distance_km / bin_size)
+            d = _conv(q.distance_km)
+            b = int(d / bin_size)
             bins[b]['total'] = bins[b].get('total', 0) + 1
             bins[b][q.band] = bins[b].get(q.band, 0) + 1
-            total_km += q.distance_km
+            total_dist += d
             total_count += 1
-            if q.distance_km > max_km:
-                max_km = q.distance_km
+            if d > max_dist_val:
+                max_dist_val = d
                 max_call = q.call
 
     total = len(log.qsos)
@@ -386,9 +447,10 @@ def prepare_distance(log: ContestLog) -> dict:
     return {
         'distance_rows': rows,
         'bands': bands,
-        'avg_km': int(total_km / total_count) if total_count else 0,
-        'max_km': int(max_km),
+        'avg_km': int(total_dist / total_count) if total_count else 0,
+        'max_km': int(max_dist_val),
         'max_call': max_call,
+        'dist_unit': unit_short,
     }
 
 
@@ -857,6 +919,23 @@ BAND_CHART_COLORS = {
     '2m':   'rgba(249,115,22,0.7)',
 }
 
+MODE_CHART_COLORS = {
+    'SSB':   'rgba(59,130,246,0.7)',
+    'USB':   'rgba(59,130,246,0.7)',
+    'LSB':   'rgba(37,99,235,0.7)',
+    'FM':    'rgba(147,197,253,0.7)',
+    'AM':    'rgba(191,219,254,0.7)',
+    'CW':    'rgba(16,185,129,0.7)',
+    'FT8':   'rgba(236,72,153,0.7)',
+    'FT4':   'rgba(249,115,22,0.7)',
+    'RTTY':  'rgba(139,92,246,0.7)',
+    'PSK31': 'rgba(168,85,247,0.7)',
+    'PSK63': 'rgba(192,132,252,0.7)',
+    'JT65':  'rgba(217,70,239,0.7)',
+    'JT9':   'rgba(232,121,249,0.7)',
+    'MFSK':  'rgba(244,114,182,0.7)',
+}
+
 CONTINENT_COLORS = {
     'NA': 'rgba(14,165,233,0.7)',
     'SA': 'rgba(245,158,11,0.7)',
@@ -906,6 +985,51 @@ def prepare_chart_qs_by_band(log: ContestLog) -> dict:
         'description': f'{len(log.qsos)} QSOs across {len(bands)} bands.',
         'detail_table': True,
         'detail_headers': ['Band', 'QSOs', '%'],
+        'detail_rows': detail_rows,
+    }
+
+
+def prepare_chart_qs_by_mode(log: ContestLog) -> dict:
+    """QSOs by specific mode (SSB/CW/FT8/FT4/RTTY...) doughnut chart."""
+    mode_counts = Counter(q.mode for q in log.qsos if q.mode)
+    modes_sorted = [m for m, _ in mode_counts.most_common()]
+    labels = [f"{m}: {mode_counts[m]} Qs" for m in modes_sorted]
+    data = [mode_counts[m] for m in modes_sorted]
+    colors = [MODE_CHART_COLORS.get(m, 'rgba(128,128,128,0.7)') for m in modes_sorted]
+
+    chart_data = {
+        'type': 'doughnut',
+        'data': {
+            'labels': labels,
+            'datasets': [{
+                'data': data,
+                'backgroundColor': colors,
+                'borderWidth': 1,
+            }],
+        },
+        'options': {
+            'responsive': True,
+            'plugins': {
+                'legend': {'position': 'right'},
+                'title': {'display': True,
+                          'text': f'QSOs by Mode ({len(log.qsos)} total)'},
+            },
+        },
+    }
+
+    total = len(log.qsos)
+    detail_rows = []
+    for m in modes_sorted:
+        c = mode_counts[m]
+        pct = c / total * 100 if total else 0
+        detail_rows.append([m, c, f"{pct:.1f}%"])
+
+    return {
+        'chart_type': 'doughnut',
+        'chart_data_json': json.dumps(chart_data),
+        'description': f'{total} QSOs across {len(modes_sorted)} modes.',
+        'detail_table': True,
+        'detail_headers': ['Mode', 'QSOs', '%'],
         'detail_rows': detail_rows,
     }
 
@@ -1119,25 +1243,57 @@ def prepare_chart_frequencies(log: ContestLog) -> dict:
     }
 
 
-def prepare_map(log: ContestLog) -> dict:
-    """Leaflet map data."""
+def prepare_map(log: ContestLog, pota_lookup=None,
+                distance_unit: str = 'km') -> dict:
+    """Leaflet map with great-circle arcs from station to each QSO."""
     band_colors_list = [(b, BAND_COLORS.get(b, '#888888')) for b in log.active_bands]
     band_color_map = {b: BAND_COLORS.get(b, '#888888') for b in log.active_bands}
+    unit_short, _, unit_factor = _dist_unit_label(distance_unit)
+
+    stn_lat, stn_lon = log.station_lat, log.station_lon
 
     qso_data = []
     for q in log.qsos:
-        if q.dxcc_lat == 0 and q.dxcc_lon == 0:
+        # Only plot QSOs where we have a trustworthy grid.
+        # If grid is missing (QRZ was rejected due to state mismatch, etc.)
+        # skip the map plot — the QSO still counts in all tabular displays.
+        if not q.grid:
             continue
+        pos = grid_to_latlon(q.grid)
+        if not pos:
+            continue
+        lat, lon = pos
+        grid_used = q.grid
+
+        # Recalculate distance/bearing using resolved coordinates
+        dist = 0
+        bear = 0
+        if stn_lat != 0.0 or stn_lon != 0.0:
+            dist = int(haversine_km(stn_lat, stn_lon, lat, lon) * unit_factor)
+            bear = int(bearing_deg(stn_lat, stn_lon, lat, lon))
+
+        pota_ref = ""
+        pota_name = ""
+        if q.pota_ref:
+            pota_ref = q.pota_ref.split(",")[0].strip().upper()
+            if pota_lookup:
+                park = pota_lookup.park_for(pota_ref)
+                if park:
+                    pota_name = park.name
+
         qso_data.append({
-            'lat': round(q.dxcc_lat, 4),
-            'lon': round(q.dxcc_lon, 4),
+            'lat': round(lat, 4),
+            'lon': round(lon, 4),
             'call': q.call,
             'band': q.band,
             'mode': q.mode,
             'time': q.datetime_utc.strftime('%Y-%m-%d %H:%M'),
             'country': q.country,
-            'dist': int(q.distance_km),
-            'bearing': int(q.bearing_deg),
+            'dist': dist,
+            'bearing': bear,
+            'grid': grid_used,
+            'pota_ref': pota_ref,
+            'pota_name': pota_name,
         })
 
     return {
@@ -1149,6 +1305,7 @@ def prepare_map(log: ContestLog) -> dict:
         'band_colors': band_colors_list,
         'band_color_map_json': json.dumps(band_color_map),
         'qso_data_json': json.dumps(qso_data),
+        'dist_unit': unit_short,
     }
 
 

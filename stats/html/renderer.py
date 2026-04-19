@@ -18,7 +18,7 @@ class NavPage:
 
 
 def _build_nav(active_bands: list[str], has_lcr: bool = False,
-               has_lotw: bool = False) -> list[NavPage]:
+               has_lotw: bool = False, has_pota: bool = False) -> list[NavPage]:
     """Build full navigation list including band-variant pages."""
     nav = [
         NavPage("Main", "index.htm"),
@@ -30,6 +30,8 @@ def _build_nav(active_bands: list[str], has_lcr: bool = False,
         NavPage("Countries", "countries.htm"),
         NavPage("Countries by time", "countries_by_time.htm"),
     ]
+    if has_pota:
+        nav.append(NavPage("POTA parks", "parks.htm"))
     for band in active_bands:
         b = band.replace('m', '')
         nav.append(NavPage(f"Countries by time - {b}", f"{b}_countries_by_time.htm", is_child=True))
@@ -69,6 +71,7 @@ def _build_nav(active_bands: list[str], has_lcr: bool = False,
     nav.extend([
         NavPage("Charts", "charts_qs_by_band.htm"),
         NavPage("Qs by band chart", "charts_qs_by_band.htm", is_child=True),
+        NavPage("Qs by mode chart", "charts_qs_by_mode.htm", is_child=True),
         NavPage("Top 10 countries", "charts_top_10_countries.htm", is_child=True),
         NavPage("Continents chart", "charts_continents.htm", is_child=True),
         NavPage("Beam heading chart", "charts_beam_heading.htm", is_child=True),
@@ -91,16 +94,26 @@ class Renderer:
                  lotw_users: set[str] | None = None,
                  callsign_lookup: str = 'qrz',
                  photos_dir: str | None = None,
-                 score_result=None):
+                 score_result=None,
+                 pota_lookup=None,
+                 activated_park: str = "",
+                 activated_park_date: str = "",
+                 distance_unit: str = "km"):
         self.log = log
         self.output_dir = output_dir
         self.scp_calls = scp_calls
         self.lotw_users = lotw_users
         self.photos_dir = photos_dir
         self.score_result = score_result
+        self.pota_lookup = pota_lookup
+        self.activated_park = activated_park
+        self.activated_park_date = activated_park_date
+        self.distance_unit = distance_unit
         has_lcr = any(q.lcr_error for q in log.qsos)
+        self.has_pota = any(q.pota_ref or q.my_pota_ref for q in log.qsos)
         self.nav_pages = _build_nav(log.active_bands, has_lcr,
-                                    has_lotw=lotw_users is not None)
+                                    has_lotw=lotw_users is not None,
+                                    has_pota=self.has_pota)
 
         template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
         self.env = jinja2.Environment(
@@ -127,12 +140,20 @@ class Renderer:
 
         year = self.log.start_time.year if self.log.start_time else ""
 
+        if self.activated_park:
+            contest_title = (f"{self.activated_park_date} POTA "
+                             f"{self.activated_park} {self.log.station_call}")
+        else:
+            contest_title = f"{self.log.contest_name} {self.log.station_call}"
+
         return {
             'page_title': page_title,
-            'contest_title': f"{self.log.contest_name} {self.log.station_call}",
+            'contest_title': contest_title,
             'contest_year': year,
             'contest_id': self.log.contest_name,
             'station_call': self.log.station_call,
+            'activated_park': self.activated_park,
+            'activated_park_date': self.activated_park_date,
             'nav_pages': self.nav_pages,
             'current_filename': filename,
             'prev_page': prev_page,
@@ -150,6 +171,7 @@ class Renderer:
         out_path = os.path.join(self.output_dir, filename)
         with open(out_path, 'w', encoding='utf-8') as f:
             f.write(html)
+        os.chmod(out_path, 0o644)
 
     def _copy_assets(self):
         """Copy CSS and JS assets to output directory."""
@@ -157,30 +179,45 @@ class Renderer:
         for fname in os.listdir(assets_dir):
             src = os.path.join(assets_dir, fname)
             if os.path.isfile(src):
-                shutil.copy2(src, os.path.join(self.output_dir, fname))
+                dest = os.path.join(self.output_dir, fname)
+                shutil.copy2(src, dest)
+                os.chmod(dest, 0o644)
 
     def _copy_photos(self) -> dict[str, str]:
-        """Find operator photos, copy to output, return call→filename map."""
+        """Find operator photos, copy to output, return call→filename map.
+
+        When a stem has multiple image extensions (e.g. ny4i.jpg AND ny4i.png),
+        pick by preference order jpg > jpeg > png and warn once.
+        """
         if not self.photos_dir or not os.path.isdir(self.photos_dir):
             return {}
 
-        photo_map = {}
-        # Index all jpg/png files in the photos directory by uppercase stem
-        available = {}
+        # Group files by uppercase stem so duplicates can be detected.
+        PREF = {'.jpg': 0, '.jpeg': 1, '.png': 2}
+        by_stem: dict[str, list[str]] = {}
         for fname in os.listdir(self.photos_dir):
             stem, ext = os.path.splitext(fname)
-            if ext.lower() in ('.jpg', '.jpeg', '.png'):
-                available[stem.upper()] = fname
+            if ext.lower() in PREF:
+                by_stem.setdefault(stem.upper(), []).append(fname)
 
+        available: dict[str, str] = {}
+        for stem, flist in by_stem.items():
+            flist.sort(key=lambda f: PREF[os.path.splitext(f)[1].lower()])
+            available[stem] = flist[0]
+            if len(flist) > 1:
+                print(f"Warning: multiple images for {stem} "
+                      f"({', '.join(flist)}); using {flist[0]}")
+
+        photo_map: dict[str, str] = {}
         photos_out = os.path.join(self.output_dir, "photos")
         for op in self.log.operators:
             match = available.get(op.upper())
             if match:
                 os.makedirs(photos_out, exist_ok=True)
-                shutil.copy2(
-                    os.path.join(self.photos_dir, match),
-                    os.path.join(photos_out, match),
-                )
+                os.chmod(photos_out, 0o755)
+                dest = os.path.join(photos_out, match)
+                shutil.copy2(os.path.join(self.photos_dir, match), dest)
+                os.chmod(dest, 0o644)
                 photo_map[op] = f"photos/{match}"
 
         return photo_map
@@ -188,12 +225,14 @@ class Renderer:
     def render_all(self):
         """Render all statistics pages."""
         os.makedirs(self.output_dir, exist_ok=True)
+        os.chmod(self.output_dir, 0o755)
         self._copy_assets()
         photo_map = self._copy_photos()
 
         # ── Phase 1: Core pages ──
         self._render_page("index.html", "index.htm", "Main",
-                          pages.prepare_index(self.log, self.score_result))
+                          pages.prepare_index(self.log, self.score_result,
+                                              distance_unit=self.distance_unit))
         self._render_page("summary.html", "summary.htm", "Summary",
                           pages.prepare_summary(self.log, self.score_result))
         self._render_page("log.html", "log.htm", "Log",
@@ -250,7 +289,7 @@ class Renderer:
         self._render_page("prefixes.html", "prefixes.htm", "Prefixes",
                           pages.prepare_prefixes(self.log))
         self._render_page("distance.html", "distance.htm", "Distance",
-                          pages.prepare_distance(self.log))
+                          pages.prepare_distance(self.log, distance_unit=self.distance_unit))
         self._render_page("beam_heading.html", "beam_heading.htm", "Beam heading",
                           pages.prepare_beam_heading(self.log))
         self._render_page("breaks.html", "breaks.htm", "Break time",
@@ -276,9 +315,16 @@ class Renderer:
             self._render_page("misc.html", "lotw_check.htm", "LOTW check",
                               pages.prepare_lotw_check(self.log, self.lotw_users))
 
+        # POTA parks page — only when log contains POTA references
+        if self.has_pota:
+            self._render_page("parks.html", "parks.htm", "POTA parks",
+                              pages.prepare_parks(self.log, self.pota_lookup))
+
         # ── Phase 3: Charts + Map + LCR ──
         self._render_page("chart.html", "charts_qs_by_band.htm", "Qs by band chart",
                           pages.prepare_chart_qs_by_band(self.log))
+        self._render_page("chart.html", "charts_qs_by_mode.htm", "Qs by mode chart",
+                          pages.prepare_chart_qs_by_mode(self.log))
         self._render_page("chart.html", "charts_top_10_countries.htm", "Top 10 countries",
                           pages.prepare_chart_top_countries(self.log))
         self._render_page("chart.html", "charts_continents.htm", "Continents chart",
@@ -288,7 +334,8 @@ class Renderer:
         self._render_page("chart.html", "charts_frequencies.htm", "Frequencies",
                           pages.prepare_chart_frequencies(self.log))
         self._render_page("map.html", "map.htm", "Map",
-                          pages.prepare_map(self.log))
+                          pages.prepare_map(self.log, self.pota_lookup,
+                                            distance_unit=self.distance_unit))
 
         # LCR summary (only if LCR data present)
         if any(q.lcr_error for q in self.log.qsos):

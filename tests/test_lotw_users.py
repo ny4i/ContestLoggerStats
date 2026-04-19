@@ -46,12 +46,13 @@ class TestFindLotwUsers:
 
     def test_none_when_no_file_exists(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
-        import stats.lotw_users as mod
-        monkeypatch.setattr(mod, "CACHE_DIR", str(tmp_path / "no_cache"))
+        # No ./databases/ in tmp_path → find returns None
         assert find_lotw_users() is None
 
-    def test_finds_in_cwd(self, tmp_path, monkeypatch):
+    def test_finds_in_databases_dir(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
-        csv = tmp_path / "lotw-user-activity.csv"
+        db_dir = tmp_path / "databases"
+        db_dir.mkdir()
+        csv = db_dir / "lotw-user-activity.csv"
         csv.write_text("W1AW,2024-01-15,12:30:00\n")
-        assert find_lotw_users() == os.path.join(".", "lotw-user-activity.csv")
+        assert find_lotw_users() == str(csv)

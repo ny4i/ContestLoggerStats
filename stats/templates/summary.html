@@ -18,7 +18,7 @@
     </tr>
     {% for band_row in band_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td><b>{{ band_row.label }}</b></td>
+        <td class="tal"><b>{{ band_row.label }}</b></td>
         {% for mg in mode_groups %}
         {% set count = band_row.by_mode.get(mg, 0) %}
         {% if count > 0 %}
@@ -36,7 +36,7 @@
     </tr>
     {% endfor %}
     <tr class="td1">
-        <td><b>All</b></td>
+        <td class="tal"><b>All</b></td>
         {% for mg in mode_groups %}
         <td>{{ totals_by_mode.get(mg, 0) }}</td>
         <td><i>{{ "%.1f"|format(totals_by_mode.get(mg, 0) / total_qsos * 100) }}</i></td>
@@ -52,7 +52,7 @@
 {% if score %}
 <h3>Estimated Score</h3>
 <div class="table-wrap">
-<table class="mtc">
+<table class="mtc kv">
     <tr class="td1"><td>QSO Points</td><td style="text-align:right"><b>{{ "{:,}".format(score.qso_points) }}</b></td></tr>
     <tr class="td0"><td>Multipliers</td><td style="text-align:right">{{ score.multipliers }} ({{ score.mult_detail }})</td></tr>
     <tr class="td1"><td><b>Estimated Score</b></td><td style="text-align:right"><b>{{ "{:,}".format(score.total_score) }}</b></td></tr>

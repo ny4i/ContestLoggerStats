@@ -16,9 +16,9 @@
         <td>{{ loop.index }}</td>
         <td>{{ m.time }}</td>
         <td>{{ m.count }}</td>
-        <td>{% for call in m.calls %}<a rel="nofollow" target="_blank" href="{{ callsign_url(call) }}">{{ call }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</td>
-        <td>{{ m.band }}</td>
-        <td>{{ m.mode }}</td>
+        <td class="tal">{% for call in m.calls %}<a rel="nofollow noopener noreferrer" target="_blank" href="{{ callsign_url(call) }}">{{ call }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</td>
+        <td class="tal">{{ m.band }}</td>
+        <td class="tal">{{ m.mode }}</td>
     </tr>
     {% endfor %}
 </table>

@@ -16,7 +16,7 @@
     {% for c in continent_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td>{{ c.name }}</td>
+        <td class="tal">{{ c.name }}</td>
         <td>{{ c.total }}</td>
         <td><i>{{ "%.1f"|format(c.pct) }}</i></td>
         <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(c.pct) }}px"></div></td>

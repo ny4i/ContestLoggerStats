@@ -60,13 +60,13 @@ class TestFindMasterScp:
 
     def test_none_when_no_file_exists(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
-        # Override CACHE_DIR to a nonexistent location
-        import stats.master_scp as mod
-        monkeypatch.setattr(mod, "CACHE_DIR", str(tmp_path / "no_cache"))
+        # No ./databases/ in tmp_path → find returns None
         assert find_master_scp() is None
 
-    def test_finds_in_cwd(self, tmp_path, monkeypatch):
+    def test_finds_in_databases_dir(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
-        scp = tmp_path / "MASTER.SCP"
+        db_dir = tmp_path / "databases"
+        db_dir.mkdir()
+        scp = db_dir / "MASTER.SCP"
         scp.write_text("W1AW\n")
-        assert find_master_scp() == os.path.join(".", "MASTER.SCP")
+        assert find_master_scp() == str(scp)

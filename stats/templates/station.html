@@ -13,7 +13,7 @@
     </tr>
     {% for s in station_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ s.label }}</td>
+        <td class="tal">{{ s.label }}</td>
         <td>{{ s.total }}</td>
         <td><i>{{ "%.1f"|format(s.pct) }}</i></td>
         <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(s.pct) }}px"></div></td>

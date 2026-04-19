@@ -13,10 +13,10 @@
     {% for p in passed_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td><a rel="nofollow" target="_blank" href="{{ callsign_url(p.call) }}">{{ p.call }}</a></td>
+        <td class="tal"><a rel="nofollow noopener noreferrer" target="_blank" href="{{ callsign_url(p.call) }}">{{ p.call }}</a></td>
         <td>{{ p.count }}</td>
-        <td>{{ p.bands }}</td>
-        <td>{{ p.operators }}</td>
+        <td class="tal">{{ p.bands }}</td>
+        <td class="tal">{{ p.operators }}</td>
     </tr>
     {% endfor %}
 </table>

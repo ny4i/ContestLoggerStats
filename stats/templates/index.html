@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="table-wrap">
-<table class="mtc">
+<table class="mtc kv">
     <tr class="thc"><th>Parameter</th><th>Value</th></tr>
-    <tr class="td1"><td>Callsign</td><td><b><a rel="nofollow" target="_blank" href="{{ callsign_url(station_call) }}">{{ station_call }}</a></b></td></tr>
+    <tr class="td1"><td>Callsign</td><td><b><a rel="nofollow noopener noreferrer" target="_blank" href="{{ callsign_url(station_call) }}">{{ station_call }}</a></b></td></tr>
     <tr class="td0"><td>Country</td><td>{{ station_country }}</td></tr>
     <tr class="td1"><td>Locator</td><td>{{ locator }}</td></tr>
     <tr class="td0"><td>Contest</td><td>{{ contest_id }}</td></tr>
@@ -18,7 +18,7 @@
     <tr class="{{ loop_class(13) }}"><td>Dupes</td><td><a href="dupes.htm">{{ dupe_count }} ({{ "%.2f"|format(dupe_pct) }} %)</a></td></tr>
     <tr class="{{ loop_class(14) }}"><td>Unique callsigns</td><td><a href="all_callsigns.htm">{{ "{:,}".format(unique_calls) }}</a></td></tr>
     <tr class="{{ loop_class(15) }}"><td>QSOs per station</td><td>{{ "%.2f"|format(qsos_per_station) }}</td></tr>
-    <tr class="{{ loop_class(16) }}"><td>Kilometers per QSO</td><td><a href="distance.htm">{{ "{:,}".format(km_per_qso) }} km</a></td></tr>
+    <tr class="{{ loop_class(16) }}"><td>{{ dist_unit_long }} per QSO</td><td><a href="distance.htm">{{ "{:,}".format(km_per_qso) }} {{ dist_unit }}</a></td></tr>
     <tr class="{{ loop_class(17) }}"><td>Countries</td><td><a href="countries.htm">{{ country_count }}</a></td></tr>
     <tr class="{{ loop_class(18) }}"><td>Prefixes</td><td><a href="prefixes.htm">{{ prefix_count }}</a></td></tr>
     <tr class="{{ loop_class(19) }}"><td>Moves</td><td>{{ "{:,}".format(move_count) }}</td></tr>

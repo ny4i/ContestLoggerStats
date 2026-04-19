@@ -11,7 +11,7 @@
     </tr>
     {% for row in type_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ row.type }}</td>
+        <td class="tal">{{ row.type }}</td>
         <td>{{ row.count }}</td>
         <td>{{ "%.1f"|format(row.pct) }}</td>
     </tr>
@@ -30,7 +30,7 @@
     </tr>
     {% for row in operator_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ row.operator }}</td>
+        <td class="tal">{{ row.operator }}</td>
         <td>{{ row.errors }}</td>
         <td>{{ row.qsos }}</td>
         <td>{{ "%.1f"|format(row.pct) }}</td>
@@ -58,12 +58,12 @@
         <td>{{ loop.index }}</td>
         <td>{{ q.date }}</td>
         <td>{{ q.time }}</td>
-        <td><a rel="nofollow" target="_blank" href="{{ callsign_url(q.call) }}">{{ q.call }}</a></td>
-        <td>{{ q.band }}</td>
-        <td>{{ q.mode }}</td>
-        <td>{{ q.error }}</td>
-        <td>{{ q.detail }}</td>
-        <td>{{ q.operator }}</td>
+        <td class="tal"><a rel="nofollow noopener noreferrer" target="_blank" href="{{ callsign_url(q.call) }}">{{ q.call }}</a></td>
+        <td class="tal">{{ q.band }}</td>
+        <td class="tal">{{ q.mode }}</td>
+        <td class="tal">{{ q.error }}</td>
+        <td class="tal">{{ q.detail }}</td>
+        <td class="tal">{{ q.operator }}</td>
     </tr>
     {% endfor %}
 </table>

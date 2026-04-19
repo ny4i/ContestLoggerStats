@@ -29,6 +29,11 @@ class QSO:
     bearing_deg: float = 0.0
     prefix: str = ""
     grid: str = ""
+    dxcc: int = 0
+    state: str = ""
+    cnty: str = ""
+    pota_ref: str = ""      # raw POTA_REF / SIG_INFO value (their side)
+    my_pota_ref: str = ""   # raw MY_POTA_REF / MY_SIG_INFO value (my side)
     # Annotations:
     is_dupe: bool = False
     exchange_error: str = ""

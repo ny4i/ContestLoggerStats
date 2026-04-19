@@ -20,12 +20,12 @@
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
         {% if has_photos %}
-        <td>{% if op.photo %}<img src="{{ op.photo }}" alt="{{ op.call }}" style="height:40px;border-radius:4px">{% endif %}</td>
+        <td>{% if op.photo %}<img src="{{ op.photo }}" alt="{{ op.call }}" style="height:96px;border-radius:8px">{% endif %}</td>
         {% endif %}
-        <td><a rel="nofollow" href="{{ callsign_url(op.call) }}">{{ op.call }}</a></td>
+        <td class="tal"><a rel="nofollow" href="{{ callsign_url(op.call) }}">{{ op.call }}</a></td>
         <td>{{ op.total }}</td>
         <td><i>{{ "%.1f"|format(op.pct) }}</i></td>
-        <td style="text-align:left"><div class="sum" style="width:{{ "%.1f"|format(op.pct) }}px"></div></td>
+        <td class="tal"><div class="sum" style="width:{{ "%.1f"|format(op.pct) }}px"></div></td>
         <td>{{ op.cw or '' }}</td>
         <td>{{ op.dig or '' }}</td>
         <td>{{ op.ph or '' }}</td>

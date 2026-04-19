@@ -48,6 +48,36 @@ def grid_to_latlon(grid: str) -> tuple[float, float] | None:
     return (lat, lon)
 
 
+def latlon_to_grid(lat: float, lon: float, precision: int = 6) -> str:
+    """Convert (lat, lon) to Maidenhead grid locator (4 or 6 char).
+
+    precision=4 returns e.g. 'FN20', precision=6 returns e.g. 'FN20mf'.
+    """
+    lon = lon + 180.0
+    lat = lat + 90.0
+
+    field_lon = int(lon / 20.0)
+    field_lat = int(lat / 10.0)
+    grid = chr(field_lon + ord('A')) + chr(field_lat + ord('A'))
+
+    lon -= field_lon * 20.0
+    lat -= field_lat * 10.0
+    square_lon = int(lon / 2.0)
+    square_lat = int(lat / 1.0)
+    grid += str(square_lon) + str(square_lat)
+
+    if precision >= 6:
+        lon -= square_lon * 2.0
+        lat -= square_lat * 1.0
+        sub_lon = int(lon / (2.0 / 24.0))
+        sub_lat = int(lat / (1.0 / 24.0))
+        sub_lon = min(sub_lon, 23)
+        sub_lat = min(sub_lat, 23)
+        grid += chr(sub_lon + ord('a')) + chr(sub_lat + ord('a'))
+
+    return grid
+
+
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Great-circle distance in km using Haversine formula."""
     lat1_r = math.radians(lat1)

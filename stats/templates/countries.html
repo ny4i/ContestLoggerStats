@@ -18,9 +18,9 @@
     {% for c in country_rows %}
     <tr class="{{ loop_class(loop.index) }}">
         <td>{{ loop.index }}</td>
-        <td>{{ c.name }}</td>
-        <td>{{ c.prefix }}</td>
-        <td>{{ c.continent }}</td>
+        <td class="tal">{{ c.name }}</td>
+        <td class="tal">{{ c.prefix }}</td>
+        <td class="tal">{{ c.continent }}</td>
         <td>{{ c.cq_zone }}</td>
         <td>{{ c.total }}</td>
         <td><i>{{ "%.1f"|format(c.pct) }}</i></td>

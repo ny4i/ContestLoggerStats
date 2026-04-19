@@ -11,11 +11,11 @@
     </tr>
     {% for r in rate_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ r.window }} min</td>
+        <td class="tal">{{ r.window }} min</td>
         <td><b>{{ r.rate }}</b></td>
         <td>{{ r.count }}</td>
-        <td>{{ r.time }}</td>
-        <td>{{ r.operator }}</td>
+        <td class="tal">{{ r.time }}</td>
+        <td class="tal">{{ r.operator }}</td>
     </tr>
     {% endfor %}
 </table>
@@ -34,7 +34,7 @@
     </tr>
     {% for h in hourly_rows %}
     <tr class="{{ loop_class(loop.index) }}">
-        <td>{{ h.label }}</td>
+        <td class="tal">{{ h.label }}</td>
         <td><b>{{ h.total }}</b></td>
         <td style="text-align:left"><div class="sum" style="width:{{ h.total }}px"></div></td>
         {% for band in bands %}

@@ -9,23 +9,9 @@ CACHE_DIR = os.path.expanduser("~/.publicLogProcessor")
 
 
 def find_lotw_users(cli_path: str | None = None) -> str | None:
-    """Search for lotw-user-activity.csv in priority order, return path or None.
-
-    Search order:
-    1. cli_path (if provided)
-    2. ./lotw-user-activity.csv in current directory
-    3. ~/.publicLogProcessor/lotw-user-activity.csv
-    """
-    candidates = []
-    if cli_path:
-        candidates.append(cli_path)
-    candidates.append(os.path.join(".", LOTW_FILENAME))
-    candidates.append(os.path.join(CACHE_DIR, LOTW_FILENAME))
-
-    for path in candidates:
-        if os.path.isfile(path):
-            return path
-    return None
+    """Return lotw-user-activity.csv path from ./databases/ (or CLI override)."""
+    from .paths import find_data_file
+    return find_data_file(LOTW_FILENAME, cli_path)
 
 
 def download_lotw_users(dest_dir: str) -> str:

@@ -49,19 +49,9 @@ class CtyDat:
 
     @staticmethod
     def find_cty_dat(cli_path: str | None = None) -> str | None:
-        """Search for cty.dat in standard locations."""
-        candidates = []
-        if cli_path:
-            candidates.append(cli_path)
-        candidates.extend([
-            os.path.join(os.getcwd(), "cty.dat"),
-            os.path.expanduser("~/Library/Application Support/TR4QT/cty.dat"),
-            os.path.expanduser("~/.tr4qt/cty.dat"),
-        ])
-        for path in candidates:
-            if os.path.isfile(path):
-                return path
-        return None
+        """Return the cty.dat path from ./databases/ (or CLI override)."""
+        from .paths import find_data_file
+        return find_data_file("cty.dat", cli_path)
 
     def load(self, filepath: str) -> bool:
         """Load and parse a CTY.DAT file. Returns True on success."""
