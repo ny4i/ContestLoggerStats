@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Download the QSO set as a KMZ file to view in <a rel="nofollow noopener noreferrer" target="_blank" href="https://www.google.com/earth/">Google Earth</a>, Google My Maps, or any KML-capable viewer. One file covers all bands; per-band variants filter to a single band.</p>
+<div class="table-wrap">
+<table class="mtc">
+    <tr class="thc">
+        <th>Scope</th>
+        <th>File</th>
+        <th>Size</th>
+    </tr>
+    {% for row in kmz_rows %}
+    <tr class="{{ loop_class(loop.index) }}">
+        <td class="tal">{{ row.label }}</td>
+        <td class="tal"><a href="{{ row.filename }}">{{ row.filename }}</a></td>
+        <td>{{ row.size }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

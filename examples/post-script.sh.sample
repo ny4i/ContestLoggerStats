@@ -1,0 +1,42 @@
+#!/bin/sh
+# Template post-script for `generate_stats.py --post-script=post-script.sh`.
+#
+# This sample is committed to the repo. Copy once to a file that is
+# gitignored, make it executable, and customize it:
+#
+#     cp post-script.sh.sample post-script.sh
+#     chmod +x post-script.sh
+#     python generate_stats.py mylog.adi --post-script=./post-script.sh
+#
+# generate_stats.py passes the absolute output directory as $1.
+# Exit non-zero on failure so the generator surfaces the error.
+
+set -e
+
+SRC="$1"
+if [ -z "$SRC" ]; then
+    echo "Usage: $0 <output-dir>" >&2
+    exit 64
+fi
+if [ ! -d "$SRC" ]; then
+    echo "Error: not a directory: $SRC" >&2
+    exit 66
+fi
+
+# ---- EDIT BELOW -------------------------------------------------------------
+# Pick one (or several). Replace placeholders with your values.
+
+# 1) Upload to a webserver via scp
+# scp -r "$SRC" user@yourhost.example:/home/user/public_html/sh5/
+
+# 2) Mirror to a webserver with rsync (incremental, faster on re-uploads)
+# rsync -az --delete "$SRC/" user@yourhost.example:/home/user/public_html/sh5/"$(basename "$SRC")/"
+
+# 3) Archive to a local directory
+# cp -R "$SRC" /path/to/archive/
+
+# 4) Notify yourself when done
+# echo "Stats ready: $SRC" | mail -s "Contest stats generated" you@example.com
+# -----------------------------------------------------------------------------
+
+echo "post-script: no action configured (edit ${0} to enable an action)."

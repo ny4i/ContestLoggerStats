@@ -79,6 +79,7 @@ def _build_nav(active_bands: list[str], has_lcr: bool = False,
         NavPage("Beam heading chart", "charts_beam_heading.htm", is_child=True),
         NavPage("Frequencies", "charts_frequencies.htm", is_child=True),
         NavPage("Map", "map.htm"),
+        NavPage("KMZ downloads", "kmz.htm"),
     ])
 
     # LCR summary (only if LCR data present)
@@ -350,6 +351,9 @@ class Renderer:
             self._render_page("lcr_summary.html", "lcr_summary.htm", "LCR Summary",
                               pages.prepare_lcr_summary(self.log))
 
-        # KMZ export
+        # KMZ export (must run before prepare_kmz so file sizes are known)
         from ..kmz_export import export_kmz
         export_kmz(self.log, self.output_dir)
+
+        self._render_page("kmz.html", "kmz.htm", "KMZ downloads",
+                          pages.prepare_kmz(self.log, self.output_dir))

@@ -184,6 +184,35 @@ def prepare_operators(log: ContestLog,
     }
 
 
+def prepare_kmz(log: ContestLog, output_dir: str) -> dict:
+    """KMZ download list — all bands + per active band, with file sizes."""
+    import os as _os
+
+    def _size(path: str) -> str:
+        try:
+            n = _os.path.getsize(path)
+        except OSError:
+            return ""
+        if n < 1024:
+            return f"{n} B"
+        if n < 1024 * 1024:
+            return f"{n / 1024:.1f} KB"
+        return f"{n / (1024 * 1024):.1f} MB"
+
+    rows = []
+    all_path = _os.path.join(output_dir, "qsos_all.kmz")
+    if _os.path.isfile(all_path):
+        rows.append({'label': 'All bands', 'filename': 'qsos_all.kmz',
+                     'size': _size(all_path)})
+    for band in log.active_bands:
+        b = band.replace('m', '')
+        fname = f"qsos_{b}.kmz"
+        path = _os.path.join(output_dir, fname)
+        if _os.path.isfile(path):
+            rows.append({'label': band, 'filename': fname, 'size': _size(path)})
+    return {'kmz_rows': rows}
+
+
 def prepare_parks(log: ContestLog, pota_lookup) -> dict:
     """POTA parks page: activator-side and hunter-side park tables.
 

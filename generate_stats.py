@@ -7,6 +7,7 @@ Generates SH5-style HTML statistics pages from ADIF contest logs.
 import argparse
 import re
 import shutil
+import subprocess
 import sys
 import os
 import urllib.request
@@ -290,6 +291,9 @@ def main():
                         help='Path to QRZ settings file (default: ~/qrz_settings.cfg)')
     parser.add_argument('--units', default=None, choices=['km', 'mi'],
                         help='Distance units (default: mi for US callsigns, km otherwise)')
+    parser.add_argument('--post-script', default=None,
+                        help='Executable to invoke after successful generation; '
+                             'receives the absolute output directory as its only arg')
 
     args = parser.parse_args()
 
@@ -683,6 +687,36 @@ def main():
         remote = args.remote.rstrip('/')
         print(f"\nTo deploy remotely:")
         print(f"  scp -r {os.path.abspath(args.output_dir)} {remote}/")
+
+    if args.post_script:
+        # Resolve bare filenames against CWD first, then PATH — matches shell
+        # intuition since Python's subprocess doesn't check CWD by default.
+        script = args.post_script
+        if not os.path.isabs(script) and '/' not in script:
+            cwd_candidate = os.path.join(os.getcwd(), script)
+            if os.path.isfile(cwd_candidate):
+                script = cwd_candidate
+            else:
+                which = shutil.which(script)
+                if which:
+                    script = which
+
+        out_abs = os.path.abspath(args.output_dir)
+        print(f"\nRunning post-script: {script} {out_abs}")
+        try:
+            result = subprocess.run([script, out_abs], check=False)
+        except FileNotFoundError:
+            print(f"Error: post-script not found: {args.post_script} "
+                  f"(not in current directory or on PATH)", file=sys.stderr)
+            sys.exit(2)
+        except PermissionError:
+            print(f"Error: post-script not executable: {script}. "
+                  f"Try `chmod +x {args.post_script}`.", file=sys.stderr)
+            sys.exit(2)
+        if result.returncode != 0:
+            print(f"Post-script exited with code {result.returncode}",
+                  file=sys.stderr)
+            sys.exit(result.returncode)
 
 
 if __name__ == '__main__':

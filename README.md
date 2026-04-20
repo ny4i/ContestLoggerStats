@@ -73,6 +73,7 @@ python generate_stats.py <adif_file> [options]
 | `--units` | Distance units `km` or `mi` (default: `mi` for US callsigns, else `km`) |
 | `--photos` | Directory of operator portraits (matched by callsign stem; prefers `.jpg` over `.png`) |
 | `--remote` | Remote `user@host:/path` for a hint-only scp command in the output |
+| `--post-script` | Path to an executable invoked after generation with the absolute output dir as `$1`; see [`examples/post-script.sh.sample`](examples/post-script.sh.sample) |
 
 **Example:**
 
