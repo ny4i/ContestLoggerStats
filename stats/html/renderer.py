@@ -3,9 +3,11 @@
 import os
 import shutil
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 import jinja2
 
+from .. import __version__, REPO_URL
 from ..contest_data import ContestLog
 from . import pages
 
@@ -109,6 +111,9 @@ class Renderer:
         self.activated_park = activated_park
         self.activated_park_date = activated_park_date
         self.distance_unit = distance_unit
+        self.generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        self.version = __version__
+        self.repo_url = REPO_URL
         has_lcr = any(q.lcr_error for q in log.qsos)
         self.has_pota = any(q.pota_ref or q.my_pota_ref for q in log.qsos)
         self.nav_pages = _build_nav(log.active_bands, has_lcr,
@@ -158,6 +163,9 @@ class Renderer:
             'current_filename': filename,
             'prev_page': prev_page,
             'next_page': next_page,
+            'version': self.version,
+            'generated_at': self.generated_at,
+            'repo_url': self.repo_url,
         }
 
     def _render_page(self, template_name: str, filename: str,

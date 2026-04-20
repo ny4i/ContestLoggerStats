@@ -6,6 +6,7 @@ Generates SH5-style HTML statistics pages from ADIF contest logs.
 
 import argparse
 import re
+import shutil
 import sys
 import os
 import urllib.request
@@ -662,6 +663,18 @@ def main():
                         activated_park_date=activated_park_date,
                         distance_unit=distance_unit)
     renderer.render_all()
+
+    # Archive the source ADIF into the output directory so LCR reruns months
+    # later can find it without depending on the original path.
+    try:
+        adif_src = os.path.abspath(args.adif)
+        adif_dest = os.path.join(os.path.abspath(args.output_dir),
+                                 os.path.basename(args.adif))
+        if adif_src != adif_dest:
+            shutil.copy2(args.adif, adif_dest)
+            os.chmod(adif_dest, 0o644)
+    except Exception as e:
+        print(f"Warning: could not archive source ADIF: {e}", file=sys.stderr)
 
     print(f"\nOutput written to {os.path.abspath(args.output_dir)}/")
     print(f"Open {os.path.join(os.path.abspath(args.output_dir), 'index.htm')} in a browser.")
